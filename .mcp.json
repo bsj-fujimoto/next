@@ -1,0 +1,9 @@
+{
+    "mcpServers": {
+      "devbot": {
+        "command": "node",
+        "args": ["/Users/fujimoto/projects/devbot/dist/index.js"]
+      }
+    }
+  }
+  
