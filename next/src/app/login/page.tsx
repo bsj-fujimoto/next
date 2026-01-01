@@ -3,6 +3,9 @@
 import { useRouter } from "next/navigation";
 import { FormEvent } from "react";
 import AnimatedBackground from "@/components/AnimatedBackground";
+import FormInput from "@/components/FormInput";
+import Checkbox from "@/components/Checkbox";
+import Button from "@/components/Button";
 import { useRedirectIfAuthenticated } from "@/hooks/useAuth";
 import { login } from "@/utils/auth";
 
@@ -42,80 +45,64 @@ export default function LoginPage() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-5">
               {/* メールアドレス */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-white/90 mb-2">
-                  メールアドレス
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                    </svg>
-                  </div>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    className="block w-full pl-10 pr-3 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
-                    placeholder="example@email.com"
-                  />
-                </div>
-              </div>
+              <FormInput
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                label="メールアドレス"
+                placeholder="example@email.com"
+                icon={
+                  <svg className="h-5 w-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                  </svg>
+                }
+              />
 
               {/* パスワード */}
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-white/90 mb-2">
-                  パスワード
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                  </div>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    className="block w-full pl-10 pr-3 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
-                    placeholder="••••••••"
-                  />
-                </div>
-              </div>
+              <FormInput
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                label="パスワード"
+                placeholder="••••••••"
+                icon={
+                  <svg className="h-5 w-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                }
+              />
             </div>
 
             {/* オプション */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-white/30 bg-white/10 text-white focus:ring-white/50 focus:ring-offset-0"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-white/80">
-                  ログイン状態を保持
-                </label>
-              </div>
+              <Checkbox
+                id="remember-me"
+                name="remember-me"
+                label="ログイン状態を保持"
+              />
               <a href="#" className="text-sm font-medium text-white/80 hover:text-white transition-colors">
                 パスワードを忘れた場合
               </a>
             </div>
 
             {/* ログインボタン */}
-            <button
+            <Button
               type="submit"
-              className="w-full flex justify-center items-center gap-2 py-3 px-4 bg-gradient-to-r from-white to-white/90 text-indigo-900 font-semibold rounded-lg shadow-lg hover:shadow-xl hover:from-white hover:to-white transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+              variant="primary"
+              size="lg"
+              fullWidth
+              icon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              }
             >
-              <span>ログイン</span>
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </button>
+              ログイン
+            </Button>
           </form>
 
           {/* 新規登録リンク */}
