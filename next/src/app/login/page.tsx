@@ -1,36 +1,24 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect } from "react";
+import { FormEvent } from "react";
+import AnimatedBackground from "@/components/AnimatedBackground";
+import { useRedirectIfAuthenticated } from "@/hooks/useAuth";
+import { login } from "@/utils/auth";
 
 export default function LoginPage() {
   const router = useRouter();
-
-  useEffect(() => {
-    // 既にログイン済みの場合はダッシュボードにリダイレクト
-    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-    if (isLoggedIn) {
-      router.push("/dashboard");
-    }
-  }, [router]);
+  useRedirectIfAuthenticated();
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // localStorageにログイン状態を保存
-    localStorage.setItem("isLoggedIn", "true");
-    // ダッシュボードに遷移
+    login();
     router.push("/dashboard");
   };
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 font-sans">
-      {/* アニメーション背景 */}
-      <div className="absolute inset-0">
-        <div className="absolute h-full w-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-20"></div>
-        <div className="absolute top-0 -left-4 h-72 w-72 rounded-full bg-purple-500 opacity-20 blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 -right-4 h-72 w-72 rounded-full bg-pink-500 opacity-20 blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-500 opacity-10 blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-      </div>
+      <AnimatedBackground />
 
       {/* メインコンテンツ */}
       <div className="relative z-10 w-full max-w-md px-6">

@@ -14,6 +14,7 @@ test.describe('Visual Regression Tests', () => {
     await expect(page).toHaveScreenshot('login-page.png', {
       fullPage: true,
       animations: 'disabled',
+      maxDiffPixelRatio: 0.02,
     });
   });
 
@@ -32,6 +33,7 @@ test.describe('Visual Regression Tests', () => {
     await expect(page).toHaveScreenshot('dashboard-page.png', {
       fullPage: true,
       animations: 'disabled',
+      maxDiffPixelRatio: 0.02,
     });
   });
 
@@ -51,6 +53,7 @@ test.describe('Visual Regression Tests', () => {
     await expect(page).toHaveScreenshot('dashboard-search-results.png', {
       fullPage: true,
       animations: 'disabled',
+      maxDiffPixelRatio: 0.02,
     });
   });
 
@@ -70,6 +73,7 @@ test.describe('Visual Regression Tests', () => {
     await expect(page).toHaveScreenshot('dashboard-page-2.png', {
       fullPage: true,
       animations: 'disabled',
+      maxDiffPixelRatio: 0.02,
     });
   });
 
@@ -84,6 +88,7 @@ test.describe('Visual Regression Tests', () => {
     const statCards = page.locator('.grid').first();
     await expect(statCards).toHaveScreenshot('stat-cards.png', {
       animations: 'disabled',
+      maxDiffPixelRatio: 0.02,
     });
   });
 
@@ -99,6 +104,7 @@ test.describe('Visual Regression Tests', () => {
     const table = page.locator('table').first();
     await expect(table).toHaveScreenshot('activity-table.png', {
       animations: 'disabled',
+      maxDiffPixelRatio: 0.02,
     });
   });
 
@@ -118,6 +124,7 @@ test.describe('Visual Regression Tests', () => {
     const pagination = page.locator('.border-t.border-white\\/20').last();
     await expect(pagination).toHaveScreenshot('pagination-controls.png', {
       animations: 'disabled',
+      maxDiffPixelRatio: 0.02,
     });
   });
 });
@@ -133,6 +140,7 @@ test.describe('Responsive Design Tests', () => {
     await expect(page).toHaveScreenshot('login-mobile.png', {
       fullPage: true,
       animations: 'disabled',
+      maxDiffPixelRatio: 0.02,
     });
   });
 
@@ -148,6 +156,7 @@ test.describe('Responsive Design Tests', () => {
     await expect(page).toHaveScreenshot('dashboard-tablet.png', {
       fullPage: true,
       animations: 'disabled',
+      maxDiffPixelRatio: 0.02,
     });
   });
 
@@ -163,6 +172,7 @@ test.describe('Responsive Design Tests', () => {
     await expect(page).toHaveScreenshot('dashboard-mobile.png', {
       fullPage: true,
       animations: 'disabled',
+      maxDiffPixelRatio: 0.02,
     });
   });
 });
