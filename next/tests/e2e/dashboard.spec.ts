@@ -225,8 +225,12 @@ test.describe('Dashboard Page', () => {
     await avatarButton.click();
     await page.waitForTimeout(500);
     
+    const menu = page.locator('div[role="menu"]');
+    await expect(menu).toBeVisible();
+    
     const logoutMenuItem = page.getByRole('menuitem', { name: 'ログアウト' });
-    await logoutMenuItem.click();
+    await expect(logoutMenuItem).toBeVisible();
+    await logoutMenuItem.evaluate((el: HTMLElement) => el.click());
     await page.waitForTimeout(1000);
 
     // Should redirect to login page
