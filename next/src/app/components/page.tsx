@@ -10,6 +10,7 @@ import SortableHeader from "@/components/DataTable/SortableHeader";
 import TableHeader from "@/components/DataTable/TableHeader";
 import TableRow from "@/components/DataTable/TableRow";
 import EmptyState from "@/components/DataTable/EmptyState";
+import ItemsPerPageDropdown from "@/components/DataTable/ItemsPerPageDropdown";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import GlassCard from "@/components/GlassCard";
 import FormInput from "@/components/FormInput";
@@ -27,7 +28,7 @@ interface ComponentItem {
   status: string;
 }
 
-type SelectedComponent = "DataTable" | "SearchBar" | "Pagination" | "SortableHeader" | "TableHeader" | "TableRow" | "EmptyState" | "AnimatedBackground" | "GlassCard" | "FormInput" | "Checkbox" | "Button" | "Link" | "Header" | "StatCard" | "StatusBadge" | null;
+type SelectedComponent = "DataTable" | "SearchBar" | "Pagination" | "ItemsPerPageDropdown" | "SortableHeader" | "TableHeader" | "TableRow" | "EmptyState" | "AnimatedBackground" | "GlassCard" | "FormInput" | "Checkbox" | "Button" | "Link" | "Header" | "StatCard" | "StatusBadge" | null;
 
 export default function ComponentsPage() {
   const [selectedComponent, setSelectedComponent] = useState<SelectedComponent>("DataTable");
@@ -203,6 +204,34 @@ const [itemsPerPage, setItemsPerPage] = useState(20);
           icon: (
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7l4-4m0 0l4 4m-4-4v18" />
+            </svg>
+          ),
+        },
+        {
+          id: "ItemsPerPageDropdown",
+          name: "ItemsPerPageDropdown",
+          title: "ItemsPerPageDropdown",
+          description: "表示件数を選択するカスタムドロップダウンコンポーネントです。ガラスモーフィズム効果とアニメーションを適用しています。",
+          codeSample: `import ItemsPerPageDropdown from "@/components/DataTable/ItemsPerPageDropdown";
+import { useState } from "react";
+
+const [itemsPerPage, setItemsPerPage] = useState(20);
+
+<ItemsPerPageDropdown
+  value={itemsPerPage}
+  options={[10, 20, 50, 100]}
+  onChange={setItemsPerPage}
+/>`,
+          variations: [
+            {
+              name: "カスタムオプション",
+              description: "表示件数のオプションをカスタマイズ",
+              code: `options={[5, 15, 30, 60, 120]}`,
+            },
+          ],
+          icon: (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           ),
         },
@@ -734,28 +763,29 @@ import Button from "@/components/Button";
                   return (
                     <div key={component.id}>
                       <div className="flex items-center">
-                        {hasChildren && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleExpand(component.id);
-                            }}
-                            className="p-1 text-white/50 hover:text-white transition-colors"
-                          >
-                            <svg
-                              className={`w-3 h-3 transition-transform ${isExpanded ? "rotate-90" : ""}`}
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
+                        <div className="w-5 flex items-center justify-center flex-shrink-0">
+                          {hasChildren && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleExpand(component.id);
+                              }}
+                              className="p-1 text-white/50 hover:text-white transition-colors"
                             >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </button>
-                        )}
-                        {!hasChildren && <div className="w-5" />}
+                              <svg
+                                className={`w-3 h-3 transition-transform ${isExpanded ? "rotate-90" : ""}`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
                         <button
                           onClick={() => setSelectedComponent(component.id as SelectedComponent)}
-                          className={`flex-1 text-left px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${
+                          className={`flex-1 text-left px-3 py-2 rounded-lg transition-all flex items-center gap-2 min-w-0 ${
                             selectedComponent === component.id
                               ? "bg-white/20 text-white font-semibold"
                               : "bg-white/5 text-white/70 hover:bg-white/10"
@@ -764,7 +794,7 @@ import Button from "@/components/Button";
                           {component.icon && (
                             <span className="flex-shrink-0">{component.icon}</span>
                           )}
-                          <span>{component.name}</span>
+                          <span className="truncate">{component.name}</span>
                         </button>
                       </div>
                       {showChildren && (
@@ -773,7 +803,7 @@ import Button from "@/components/Button";
                             <button
                               key={child.id}
                               onClick={() => setSelectedComponent(child.id as SelectedComponent)}
-                              className={`w-full text-left px-3 py-2 rounded-lg transition-all flex items-center gap-2 text-sm ${
+                              className={`w-full text-left px-3 py-2 rounded-lg transition-all flex items-center gap-2 text-sm min-w-0 ${
                                 selectedComponent === child.id
                                   ? "bg-white/20 text-white font-semibold"
                                   : "bg-white/5 text-white/60 hover:bg-white/10"
@@ -782,7 +812,7 @@ import Button from "@/components/Button";
                               {child.icon && (
                                 <span className="flex-shrink-0">{child.icon}</span>
                               )}
-                              <span>{child.name}</span>
+                              <span className="truncate">{child.name}</span>
                             </button>
                           ))}
                         </div>
@@ -1009,6 +1039,92 @@ import Button from "@/components/Button";
                               margin: 0,
                               borderRadius: "0.5rem",
                               fontSize: "0.875rem",
+                            }}
+                          >
+                            {selectedComponentData.codeSample}
+                          </SyntaxHighlighter>
+                        </div>
+                      </div>
+                    )}
+                    {selectedComponentData.variations && selectedComponentData.variations.length > 0 && (
+                      <div className="mt-6 backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 shadow-2xl p-6">
+                        <h3 className="text-lg font-semibold text-white mb-4">バリエーション</h3>
+                        <div className="space-y-4">
+                          {selectedComponentData.variations.map((variation: any, index: number) => (
+                            <div key={index} className="border-l-2 border-white/20 pl-4">
+                              <h4 className="text-white font-medium mb-1">{variation.name}</h4>
+                              <p className="text-white/70 text-sm mb-2">{variation.description}</p>
+                              <div className="relative">
+                                <button
+                                  onClick={() => copyToClipboard(variation.code)}
+                                  className="absolute top-2 right-2 p-1.5 rounded bg-white/10 backdrop-blur-sm border border-white/20 text-white/70 hover:text-white hover:bg-white/20 transition-all z-10"
+                                  title="コピー"
+                                >
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                  </svg>
+                                </button>
+                                <div className="rounded-lg overflow-hidden">
+                                  <SyntaxHighlighter
+                                    language="typescript"
+                                    style={vscDarkPlus}
+                                    customStyle={{
+                                      margin: 0,
+                                      borderRadius: "0.5rem",
+                                      fontSize: "0.75rem",
+                                      padding: "0.75rem",
+                                    }}
+                                  >
+                                    {variation.code}
+                                  </SyntaxHighlighter>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+                {selectedComponent === "ItemsPerPageDropdown" && (
+                  <>
+                    <div className="relative z-20 backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 shadow-2xl p-6">
+                      <div className="mb-4">
+                        <h3 className="text-lg font-semibold text-white mb-2">ItemsPerPageDropdown プレビュー</h3>
+                        <p className="text-white/70 text-sm mb-4">{selectedComponentData?.description}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-white/70">表示件数:</span>
+                        <ItemsPerPageDropdown
+                          value={20}
+                          options={[10, 20, 50, 100]}
+                          onChange={() => {}}
+                        />
+                      </div>
+                    </div>
+                    {selectedComponentData.codeSample && (
+                      <div className="relative z-10 mt-6 backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 shadow-2xl p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold text-white">コードサンプル</h3>
+                          <button
+                            onClick={() => copyToClipboard(selectedComponentData.codeSample || "")}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm hover:bg-white/20 transition-all"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            コピー
+                          </button>
+                        </div>
+                        <div className="rounded-lg overflow-hidden">
+                          <SyntaxHighlighter
+                            language="typescript"
+                            style={vscDarkPlus}
+                            customStyle={{
+                              margin: 0,
+                              borderRadius: "0.5rem",
+                              fontSize: "0.875rem",
+                              padding: "1rem",
                             }}
                           >
                             {selectedComponentData.codeSample}

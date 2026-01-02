@@ -1,17 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import SearchBar from "./DataTable/SearchBar";
 import Pagination from "./DataTable/Pagination";
 import TableHeader from "./DataTable/TableHeader";
 import TableRow from "./DataTable/TableRow";
 import EmptyState from "./DataTable/EmptyState";
 
-interface Column<T> {
-  key: keyof T;
-  label: string;
-  sortable?: boolean;
-}
+import type { Column } from "@/types/table";
 
 interface DataTableProps<T> {
   data: T[];
@@ -21,6 +17,7 @@ interface DataTableProps<T> {
   pagination?: boolean;
   itemsPerPageOptions?: number[];
   defaultItemsPerPage?: number;
+  getRowKey?: (item: T, index: number) => string | number;
 }
 
 export default function DataTable<T extends Record<string, any>>({
@@ -31,6 +28,7 @@ export default function DataTable<T extends Record<string, any>>({
   pagination = true,
   itemsPerPageOptions = [10, 20, 50, 100],
   defaultItemsPerPage = 20,
+  getRowKey,
 }: DataTableProps<T>) {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortColumn, setSortColumn] = useState<keyof T | null>(null);
@@ -39,26 +37,30 @@ export default function DataTable<T extends Record<string, any>>({
   const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage);
 
   // 検索フィルタリング
-  const filteredData = data.filter((item) => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return columns.some((col) => {
-      const value = String(item[col.key] || "").toLowerCase();
-      return value.includes(query);
+  const filteredData = useMemo(() => {
+    return data.filter((item) => {
+      if (!searchQuery) return true;
+      const query = searchQuery.toLowerCase();
+      return columns.some((col) => {
+        const value = String(item[col.key] || "").toLowerCase();
+        return value.includes(query);
+      });
     });
-  });
+  }, [data, searchQuery, columns]);
 
   // ソート処理
-  const sortedData = [...filteredData].sort((a, b) => {
-    if (!sortColumn) return 0;
+  const sortedData = useMemo(() => {
+    return [...filteredData].sort((a, b) => {
+      if (!sortColumn) return 0;
 
-    const aValue = String(a[sortColumn] || "");
-    const bValue = String(b[sortColumn] || "");
+      const aValue = String(a[sortColumn] || "");
+      const bValue = String(b[sortColumn] || "");
 
-    if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-    if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-    return 0;
-  });
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [filteredData, sortColumn, sortDirection]);
 
   // ページネーション計算
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
@@ -72,14 +74,14 @@ export default function DataTable<T extends Record<string, any>>({
   }, [searchQuery, sortColumn, sortDirection, itemsPerPage]);
 
   // ソートハンドラー
-  const handleSort = (column: keyof T) => {
+  const handleSort = useCallback((column: keyof T) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortColumn(column);
       setSortDirection("asc");
     }
-  };
+  }, [sortColumn, sortDirection]);
 
   return (
     <div className="backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 shadow-2xl overflow-hidden">
@@ -116,9 +118,12 @@ export default function DataTable<T extends Record<string, any>>({
               onSort={handleSort}
             />
             <tbody className="divide-y divide-white/10">
-              {paginatedData.map((item, index) => (
-                <TableRow key={index} item={item} columns={columns} index={index} />
-              ))}
+              {paginatedData.map((item, index) => {
+                const key = getRowKey ? getRowKey(item, index) : (item.id ?? index);
+                return (
+                  <TableRow key={key} item={item} columns={columns} index={index} />
+                );
+              })}
             </tbody>
           </table>
         ) : (

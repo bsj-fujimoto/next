@@ -1,3 +1,5 @@
+import ItemsPerPageDropdown from "./ItemsPerPageDropdown";
+
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
@@ -31,17 +33,11 @@ export default function Pagination({
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm text-white/70">表示件数:</span>
-          <select
+          <ItemsPerPageDropdown
             value={itemsPerPage}
-            onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
-            className="px-3 py-1 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
-          >
-            {itemsPerPageOptions.map((option) => (
-              <option key={option} value={option} className="bg-zinc-900">
-                {option}
-              </option>
-            ))}
-          </select>
+            options={itemsPerPageOptions}
+            onChange={onItemsPerPageChange}
+          />
         </div>
       </div>
       <div className="flex items-center gap-2">
