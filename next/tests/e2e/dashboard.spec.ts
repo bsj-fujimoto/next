@@ -118,48 +118,56 @@ test.describe('Dashboard Page', () => {
 
   test('should display avatar icon', async ({ page }) => {
     // Check avatar icon is visible in header
-    const avatarButton = page.locator('button[aria-label*="アバター"], button[aria-label*="avatar"], button[aria-label*="ユーザー"]').first();
+    const avatarButton = page.getByRole('button', { name: 'ユーザーメニュー' });
     await expect(avatarButton).toBeVisible();
   });
 
   test('should open dropdown menu when avatar icon is clicked', async ({ page }) => {
     // Find and click avatar icon
-    const avatarButton = page.locator('button[aria-label*="アバター"], button[aria-label*="avatar"], button[aria-label*="ユーザー"]').first();
+    const avatarButton = page.getByRole('button', { name: 'ユーザーメニュー' });
     await avatarButton.click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(500);
 
     // Check dropdown menu is visible
-    await expect(page.getByText('プロフィール')).toBeVisible();
-    await expect(page.getByText('セッティング')).toBeVisible();
-    await expect(page.getByText('ログアウト')).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'プロフィール' })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'セッティング' })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'ログアウト' })).toBeVisible();
   });
 
   test('should close dropdown menu when clicking outside', async ({ page }) => {
     // Open menu
-    const avatarButton = page.locator('button[aria-label*="アバター"], button[aria-label*="avatar"], button[aria-label*="ユーザー"]').first();
+    const avatarButton = page.getByRole('button', { name: 'ユーザーメニュー' });
     await avatarButton.click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(500);
 
     // Verify menu is open
-    await expect(page.getByText('プロフィール')).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'プロフィール' })).toBeVisible();
 
     // Click outside (on header title)
     await page.getByText('ダッシュボード').click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(500);
 
     // Verify menu is closed
-    await expect(page.getByText('プロフィール')).not.toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'プロフィール' })).not.toBeVisible();
   });
 
   test('should navigate to profile page', async ({ page }) => {
     // Open menu
-    const avatarButton = page.locator('button[aria-label*="アバター"], button[aria-label*="avatar"], button[aria-label*="ユーザー"]').first();
+    const avatarButton = page.getByRole('button', { name: 'ユーザーメニュー' });
     await avatarButton.click();
-    await page.waitForTimeout(300);
-
-    // Click profile menu item
-    await page.getByText('プロフィール').click();
     await page.waitForTimeout(500);
+
+    // Wait for menu to be visible
+    const menu = page.locator('div[role="menu"]');
+    await expect(menu).toBeVisible();
+
+    // Click profile menu item using text content
+    const profileMenuItem = page.getByRole('menuitem', { name: 'プロフィール' });
+    await expect(profileMenuItem).toBeVisible();
+    
+    // Use evaluate to click directly on the element
+    await profileMenuItem.evaluate((el: HTMLElement) => el.click());
+    await page.waitForTimeout(1000);
 
     // Should navigate to profile page
     await expect(page).toHaveURL('/profile');
@@ -167,13 +175,21 @@ test.describe('Dashboard Page', () => {
 
   test('should navigate to settings page', async ({ page }) => {
     // Open menu
-    const avatarButton = page.locator('button[aria-label*="アバター"], button[aria-label*="avatar"], button[aria-label*="ユーザー"]').first();
+    const avatarButton = page.getByRole('button', { name: 'ユーザーメニュー' });
     await avatarButton.click();
-    await page.waitForTimeout(300);
-
-    // Click settings menu item
-    await page.getByText('セッティング').click();
     await page.waitForTimeout(500);
+
+    // Wait for menu to be visible
+    const menu = page.locator('div[role="menu"]');
+    await expect(menu).toBeVisible();
+
+    // Click settings menu item using text content
+    const settingsMenuItem = page.getByRole('menuitem', { name: 'セッティング' });
+    await expect(settingsMenuItem).toBeVisible();
+    
+    // Use evaluate to click directly on the element
+    await settingsMenuItem.evaluate((el: HTMLElement) => el.click());
+    await page.waitForTimeout(1000);
 
     // Should navigate to settings page
     await expect(page).toHaveURL('/settings');
@@ -181,13 +197,21 @@ test.describe('Dashboard Page', () => {
 
   test('should logout successfully from dropdown menu', async ({ page }) => {
     // Open menu
-    const avatarButton = page.locator('button[aria-label*="アバター"], button[aria-label*="avatar"], button[aria-label*="ユーザー"]').first();
+    const avatarButton = page.getByRole('button', { name: 'ユーザーメニュー' });
     await avatarButton.click();
-    await page.waitForTimeout(300);
-
-    // Click logout menu item
-    await page.getByText('ログアウト').click();
     await page.waitForTimeout(500);
+
+    // Wait for menu to be visible
+    const menu = page.locator('div[role="menu"]');
+    await expect(menu).toBeVisible();
+
+    // Click logout menu item using text content
+    const logoutMenuItem = page.getByRole('menuitem', { name: 'ログアウト' });
+    await expect(logoutMenuItem).toBeVisible();
+    
+    // Use evaluate to click directly on the element
+    await logoutMenuItem.evaluate((el: HTMLElement) => el.click());
+    await page.waitForTimeout(1000);
 
     // Should redirect to login page
     await expect(page).toHaveURL('/login');
@@ -196,17 +220,14 @@ test.describe('Dashboard Page', () => {
 
   test('should logout successfully', async ({ page }) => {
     // This test is kept for backward compatibility
-    // Try to find logout button (might be in dropdown or direct button)
-    const logoutButton = page.getByRole('button', { name: /ログアウト/ }).first();
-    if (await logoutButton.isVisible()) {
-      await logoutButton.click();
-    } else {
-      // If not visible, open dropdown and click logout
-      const avatarButton = page.locator('button[aria-label*="アバター"], button[aria-label*="avatar"], button[aria-label*="ユーザー"]').first();
-      await avatarButton.click();
-      await page.waitForTimeout(300);
-      await page.getByText('ログアウト').click();
-    }
+    // Open dropdown and click logout
+    const avatarButton = page.getByRole('button', { name: 'ユーザーメニュー' });
+    await avatarButton.click();
+    await page.waitForTimeout(500);
+    
+    const logoutMenuItem = page.getByRole('menuitem', { name: 'ログアウト' });
+    await logoutMenuItem.click();
+    await page.waitForTimeout(1000);
 
     // Should redirect to login page
     await expect(page).toHaveURL('/login');

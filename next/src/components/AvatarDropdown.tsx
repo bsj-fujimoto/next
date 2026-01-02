@@ -90,7 +90,7 @@ function AvatarDropdown({ className = "" }: AvatarDropdownProps) {
         <div
           role="menu"
           aria-orientation="vertical"
-          className="absolute top-full right-0 mt-2 z-50 min-w-[200px] rounded-lg border border-white/20 shadow-2xl overflow-hidden backdrop-blur-xl bg-white/10"
+          className="absolute top-full right-0 mt-2 z-[9999] min-w-[200px] rounded-lg border border-white/20 shadow-2xl overflow-hidden backdrop-blur-xl bg-white/10"
         >
           <button
             type="button"
