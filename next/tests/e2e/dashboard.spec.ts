@@ -116,9 +116,97 @@ test.describe('Dashboard Page', () => {
     await expect(page.getByText(/全 1000 件中 1 - 50/).first()).toBeVisible();
   });
 
+  test('should display avatar icon', async ({ page }) => {
+    // Check avatar icon is visible in header
+    const avatarButton = page.locator('button[aria-label*="アバター"], button[aria-label*="avatar"], button[aria-label*="ユーザー"]').first();
+    await expect(avatarButton).toBeVisible();
+  });
+
+  test('should open dropdown menu when avatar icon is clicked', async ({ page }) => {
+    // Find and click avatar icon
+    const avatarButton = page.locator('button[aria-label*="アバター"], button[aria-label*="avatar"], button[aria-label*="ユーザー"]').first();
+    await avatarButton.click();
+    await page.waitForTimeout(300);
+
+    // Check dropdown menu is visible
+    await expect(page.getByText('プロフィール')).toBeVisible();
+    await expect(page.getByText('セッティング')).toBeVisible();
+    await expect(page.getByText('ログアウト')).toBeVisible();
+  });
+
+  test('should close dropdown menu when clicking outside', async ({ page }) => {
+    // Open menu
+    const avatarButton = page.locator('button[aria-label*="アバター"], button[aria-label*="avatar"], button[aria-label*="ユーザー"]').first();
+    await avatarButton.click();
+    await page.waitForTimeout(300);
+
+    // Verify menu is open
+    await expect(page.getByText('プロフィール')).toBeVisible();
+
+    // Click outside (on header title)
+    await page.getByText('ダッシュボード').click();
+    await page.waitForTimeout(300);
+
+    // Verify menu is closed
+    await expect(page.getByText('プロフィール')).not.toBeVisible();
+  });
+
+  test('should navigate to profile page', async ({ page }) => {
+    // Open menu
+    const avatarButton = page.locator('button[aria-label*="アバター"], button[aria-label*="avatar"], button[aria-label*="ユーザー"]').first();
+    await avatarButton.click();
+    await page.waitForTimeout(300);
+
+    // Click profile menu item
+    await page.getByText('プロフィール').click();
+    await page.waitForTimeout(500);
+
+    // Should navigate to profile page
+    await expect(page).toHaveURL('/profile');
+  });
+
+  test('should navigate to settings page', async ({ page }) => {
+    // Open menu
+    const avatarButton = page.locator('button[aria-label*="アバター"], button[aria-label*="avatar"], button[aria-label*="ユーザー"]').first();
+    await avatarButton.click();
+    await page.waitForTimeout(300);
+
+    // Click settings menu item
+    await page.getByText('セッティング').click();
+    await page.waitForTimeout(500);
+
+    // Should navigate to settings page
+    await expect(page).toHaveURL('/settings');
+  });
+
+  test('should logout successfully from dropdown menu', async ({ page }) => {
+    // Open menu
+    const avatarButton = page.locator('button[aria-label*="アバター"], button[aria-label*="avatar"], button[aria-label*="ユーザー"]').first();
+    await avatarButton.click();
+    await page.waitForTimeout(300);
+
+    // Click logout menu item
+    await page.getByText('ログアウト').click();
+    await page.waitForTimeout(500);
+
+    // Should redirect to login page
+    await expect(page).toHaveURL('/login');
+    await expect(page.getByText('ようこそ')).toBeVisible();
+  });
+
   test('should logout successfully', async ({ page }) => {
-    // Click logout button
-    await page.getByRole('button', { name: /ログアウト/ }).click();
+    // This test is kept for backward compatibility
+    // Try to find logout button (might be in dropdown or direct button)
+    const logoutButton = page.getByRole('button', { name: /ログアウト/ }).first();
+    if (await logoutButton.isVisible()) {
+      await logoutButton.click();
+    } else {
+      // If not visible, open dropdown and click logout
+      const avatarButton = page.locator('button[aria-label*="アバター"], button[aria-label*="avatar"], button[aria-label*="ユーザー"]').first();
+      await avatarButton.click();
+      await page.waitForTimeout(300);
+      await page.getByText('ログアウト').click();
+    }
 
     // Should redirect to login page
     await expect(page).toHaveURL('/login');
