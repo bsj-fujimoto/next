@@ -129,9 +129,29 @@ test.describe('Dashboard Page', () => {
     await page.waitForTimeout(500);
 
     // Check dropdown menu is visible
+    const menu = page.locator('div[role="menu"]');
+    await expect(menu).toBeVisible();
     await expect(page.getByRole('menuitem', { name: 'プロフィール' })).toBeVisible();
     await expect(page.getByRole('menuitem', { name: 'セッティング' })).toBeVisible();
     await expect(page.getByRole('menuitem', { name: 'ログアウト' })).toBeVisible();
+
+    // Verify dropdown menu is displayed above other elements (z-index check)
+    const menuElement = await menu.boundingBox();
+    const statCard = page.locator('text=¥1,234,567').first();
+    const statCardElement = await statCard.boundingBox();
+    
+    if (menuElement && statCardElement) {
+      // Menu should be visible and not hidden behind other elements
+      // Check that menu is clickable (not covered by other elements)
+      const menuCenterX = menuElement.x + menuElement.width / 2;
+      const menuCenterY = menuElement.y + menuElement.height / 2;
+      const elementAtMenuPosition = await page.evaluate((x, y) => {
+        return document.elementFromPoint(x, y)?.getAttribute('role');
+      }, menuCenterX, menuCenterY);
+      
+      // Menu should be the topmost element at its position
+      expect(elementAtMenuPosition).toBe('menu');
+    }
   });
 
   test('should close dropdown menu when clicking outside', async ({ page }) => {

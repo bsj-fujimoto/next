@@ -214,3 +214,4 @@ test('should logout successfully', async ({ page }) => {
 - [ ] メニューの位置が適切に調整される
 - [ ] ガイドラインに準拠している
 
+
