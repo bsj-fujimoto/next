@@ -14,7 +14,7 @@ interface ComponentItem {
   status: string;
 }
 
-type SelectedComponent = "DataTable" | "SearchBar" | "Pagination" | "ItemsPerPageDropdown" | "SortableHeader" | "TableHeader" | "TableRow" | "EmptyState" | "AnimatedBackground" | "GlassCard" | "FormInput" | "Checkbox" | "Button" | "Link" | "Header" | "StatCard" | "StatusBadge" | "Toast" | null;
+type SelectedComponent = "DataTable" | "SearchBar" | "Pagination" | "ItemsPerPageDropdown" | "SortableHeader" | "TableHeader" | "TableRow" | "EmptyState" | "AnimatedBackground" | "GlassCard" | "FormInput" | "Checkbox" | "Button" | "Link" | "Header" | "StatCard" | "StatusBadge" | "Toast" | "DropdownMenu" | "AvatarDropdown" | null;
 
 export default function ComponentsPage() {
   const [selectedComponent, setSelectedComponent] = useState<SelectedComponent>("DataTable");

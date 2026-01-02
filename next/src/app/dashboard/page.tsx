@@ -77,7 +77,7 @@ export default function DashboardPage() {
       <AnimatedBackground />
 
       {/* ヘッダー */}
-      <header className="relative z-10 backdrop-blur-xl bg-white/10 border-b border-white/20">
+      <header className="relative z-40 backdrop-blur-xl bg-white/10 border-b border-white/20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-3">
@@ -98,7 +98,7 @@ export default function DashboardPage() {
       </header>
 
       {/* メインコンテンツ */}
-      <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="relative z-0 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* 統計カード */}
         <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <div className="backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 p-6 shadow-2xl hover:bg-white/15 transition-all duration-200 transform hover:scale-105">

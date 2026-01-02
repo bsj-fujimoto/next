@@ -25,6 +25,8 @@ import Header from "@/components/Header";
 import StatCard from "@/components/StatCard";
 import StatusBadge from "@/components/StatusBadge";
 import Toast from "@/components/Toast";
+import DropdownMenu from "@/components/DropdownMenu";
+import AvatarDropdown from "@/components/AvatarDropdown";
 
 interface ComponentPreviewProps {
   componentData: ComponentItem;
@@ -54,6 +56,8 @@ const componentMap: Record<string, React.ComponentType<any>> = {
   StatCard,
   StatusBadge,
   Toast,
+  DropdownMenu,
+  AvatarDropdown,
 };
 
 export default function ComponentPreview({
@@ -195,6 +199,15 @@ export default function ComponentPreview({
         },
         StatusBadge: { status: "success" as const, children: "サンプル" },
         Toast: { message: "サンプルメッセージ", isVisible: true, onClose: () => {}, duration: 3000 },
+        DropdownMenu: {
+          trigger: <button className="px-4 py-2 bg-blue-500 text-white rounded">メニューを開く</button>,
+          items: [
+            { label: "項目1", onClick: () => {} },
+            { label: "項目2", onClick: () => {} },
+            { label: "項目3", onClick: () => {} },
+          ],
+        },
+        AvatarDropdown: {},
       };
 
       const props = defaultProps[componentName] || {};

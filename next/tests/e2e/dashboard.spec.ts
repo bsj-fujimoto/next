@@ -2,6 +2,13 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Dashboard Page', () => {
   test.beforeEach(async ({ page }) => {
+    // Clear console errors before each test
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        throw new Error(`Console error: ${msg.text()}`);
+      }
+    });
+
     // Login before each test
     await page.goto('/login');
     await page.evaluate(() => localStorage.setItem('isLoggedIn', 'true'));
