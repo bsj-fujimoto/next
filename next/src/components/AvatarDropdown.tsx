@@ -11,6 +11,7 @@ interface AvatarDropdownProps {
 function AvatarDropdown({ className = "" }: AvatarDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const avatarButtonRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -28,16 +29,54 @@ function AvatarDropdown({ className = "" }: AvatarDropdownProps) {
       setIsOpen(false);
     };
 
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isOpen) return;
+
+      const menuItems = Array.from(
+        dropdownRef.current?.querySelectorAll('[role="menuitem"]') || []
+      ) as HTMLElement[];
+      
+      const currentIndex = menuItems.findIndex(item => item === document.activeElement);
+
+      switch (event.key) {
+        case 'ArrowDown':
+          event.preventDefault();
+          const nextIndex = currentIndex < menuItems.length - 1 ? currentIndex + 1 : 0;
+          menuItems[nextIndex]?.focus();
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          const prevIndex = currentIndex > 0 ? currentIndex - 1 : menuItems.length - 1;
+          menuItems[prevIndex]?.focus();
+          break;
+        case 'Escape':
+          event.preventDefault();
+          setIsOpen(false);
+          avatarButtonRef.current?.focus();
+          break;
+      }
+    };
+
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
       window.addEventListener("scroll", handleScroll, true);
       window.addEventListener("resize", handleResize);
+      document.addEventListener("keydown", handleKeyDown);
+      
+      // Focus first menu item when menu opens
+      const menuItems = Array.from(
+        dropdownRef.current?.querySelectorAll('[role="menuitem"]') || []
+      ) as HTMLElement[];
+      if (menuItems.length > 0) {
+        setTimeout(() => menuItems[0]?.focus(), 0);
+      }
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("scroll", handleScroll, true);
       window.removeEventListener("resize", handleResize);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen]);
 
@@ -64,6 +103,7 @@ function AvatarDropdown({ className = "" }: AvatarDropdownProps) {
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
       <button
+        ref={avatarButtonRef}
         type="button"
         onClick={handleToggle}
         aria-label="ユーザーメニュー"
@@ -96,7 +136,8 @@ function AvatarDropdown({ className = "" }: AvatarDropdownProps) {
             type="button"
             role="menuitem"
             onClick={handleProfile}
-            className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/20 transition-all flex items-center gap-3"
+            tabIndex={0}
+            className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/20 focus:bg-white/20 focus:outline-none transition-all flex items-center gap-3"
           >
             <svg
               className="w-5 h-5"
@@ -117,7 +158,8 @@ function AvatarDropdown({ className = "" }: AvatarDropdownProps) {
             type="button"
             role="menuitem"
             onClick={handleSettings}
-            className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/20 transition-all flex items-center gap-3 border-t border-white/10"
+            tabIndex={0}
+            className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/20 focus:bg-white/20 focus:outline-none transition-all flex items-center gap-3 border-t border-white/10"
           >
             <svg
               className="w-5 h-5"
@@ -144,7 +186,8 @@ function AvatarDropdown({ className = "" }: AvatarDropdownProps) {
             type="button"
             role="menuitem"
             onClick={handleLogout}
-            className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/20 transition-all flex items-center gap-3 border-t border-white/10"
+            tabIndex={0}
+            className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/20 focus:bg-white/20 focus:outline-none transition-all flex items-center gap-3 border-t border-white/10"
           >
             <svg
               className="w-5 h-5"
