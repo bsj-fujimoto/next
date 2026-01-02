@@ -1,12 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import AnimatedBackground from "@/components/AnimatedBackground";
+import DataTable from "@/components/DataTable";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { logout } from "@/utils/auth";
+import type { Column } from "@/types/table";
 
-interface Activity {
+interface Activity extends Record<string, unknown> {
   id: number;
   user: string;
   action: string;
@@ -14,21 +16,12 @@ interface Activity {
   status: string;
 }
 
-type SortColumn = "user" | "action" | "datetime" | "status" | null;
-type SortDirection = "asc" | "desc";
-
 export default function DashboardPage() {
   const router = useRouter();
   useRequireAuth();
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortColumn, setSortColumn] = useState<SortColumn>(null);
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(20);
-
   // アクティビティデータ
-  const generateActivities = (): Activity[] => {
+  const activities = useMemo((): Activity[] => {
     const users = [
       "山田 太郎", "佐藤 花子", "鈴木 一郎", "高橋 美咲", "田中 健太",
       "伊藤 由美", "渡辺 翔太", "中村 さくら", "小林 大輔", "加藤 愛美",
@@ -41,7 +34,7 @@ export default function DashboardPage() {
     ];
     const statuses = ["成功", "保留中", "失敗"];
 
-    const activities: Activity[] = [];
+    const result: Activity[] = [];
     const now = new Date("2024-01-15 12:00");
 
     for (let i = 1; i <= 1000; i++) {
@@ -49,7 +42,6 @@ export default function DashboardPage() {
       const randomAction = actions[Math.floor(Math.random() * actions.length)];
       const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
 
-      // 過去30日間のランダムな日時を生成
       const randomDaysAgo = Math.floor(Math.random() * 30);
       const randomHours = Math.floor(Math.random() * 24);
       const randomMinutes = Math.floor(Math.random() * 60);
@@ -61,7 +53,7 @@ export default function DashboardPage() {
 
       const datetime = `${activityDate.getFullYear()}-${String(activityDate.getMonth() + 1).padStart(2, '0')}-${String(activityDate.getDate()).padStart(2, '0')} ${String(activityDate.getHours()).padStart(2, '0')}:${String(activityDate.getMinutes()).padStart(2, '0')}`;
 
-      activities.push({
+      result.push({
         id: i,
         user: randomUser,
         action: randomAction,
@@ -70,77 +62,16 @@ export default function DashboardPage() {
       });
     }
 
-    return activities;
-  };
+    return result;
+  }, []);
 
-  const activities: Activity[] = generateActivities();
-
-  // 検索フィルタリング
-  const filteredActivities = activities.filter((activity) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      activity.user.toLowerCase().includes(query) ||
-      activity.action.toLowerCase().includes(query) ||
-      activity.datetime.toLowerCase().includes(query) ||
-      activity.status.toLowerCase().includes(query)
-    );
-  });
-
-  // ソート処理
-  const sortedActivities = [...filteredActivities].sort((a, b) => {
-    if (!sortColumn) return 0;
-
-    let aValue: string;
-    let bValue: string;
-
-    switch (sortColumn) {
-      case "user":
-        aValue = a.user;
-        bValue = b.user;
-        break;
-      case "action":
-        aValue = a.action;
-        bValue = b.action;
-        break;
-      case "datetime":
-        aValue = a.datetime;
-        bValue = b.datetime;
-        break;
-      case "status":
-        aValue = a.status;
-        bValue = b.status;
-        break;
-      default:
-        return 0;
-    }
-
-    if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-    if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-    return 0;
-  });
-
-  // ページネーション計算
-  const totalPages = Math.ceil(sortedActivities.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedActivities = sortedActivities.slice(startIndex, endIndex);
-
-  // ページ変更時に検索/ソートが変わったら1ページ目に戻る
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, sortColumn, sortDirection, itemsPerPage]);
-
-  // ソートハンドラー
-  const handleSort = (column: SortColumn) => {
-    if (sortColumn === column) {
-      // 同じ列をクリックした場合は昇順/降順を切り替え
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      // 新しい列をクリックした場合はその列で昇順ソート
-      setSortColumn(column);
-      setSortDirection("asc");
-    }
-  };
+  const columns: Column<Activity>[] = [
+    { key: "id", label: "ID", sortable: true, sortType: "number" },
+    { key: "user", label: "ユーザー", sortable: true },
+    { key: "action", label: "アクション", sortable: true },
+    { key: "datetime", label: "日時", sortable: true, sortType: "date" },
+    { key: "status", label: "ステータス", sortable: true },
+  ];
 
   const handleLogout = () => {
     logout();
@@ -306,367 +237,22 @@ export default function DashboardPage() {
         </div>
 
         {/* テーブル */}
-        <div className="backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 shadow-2xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-white/20">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                最近のアクティビティ
-              </h2>
-            </div>
-            {/* 検索バー */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="ユーザー、アクション、日時、ステータスで検索..."
-                className="block w-full pl-10 pr-3 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
-              />
-            </div>
+        <div>
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              最近のアクティビティ
+            </h2>
           </div>
-
-          {/* ページネーション（上部） */}
-          {sortedActivities.length > 0 && (
-            <div className="px-6 py-4 border-b border-white/20 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="text-sm text-white/70">
-                  全 {sortedActivities.length} 件中 {startIndex + 1} - {Math.min(endIndex, sortedActivities.length)} 件を表示
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-white/70">表示件数:</span>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                    className="px-3 py-1 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
-                  >
-                    <option value={10} className="bg-zinc-900">10</option>
-                    <option value={20} className="bg-zinc-900">20</option>
-                    <option value={50} className="bg-zinc-900">50</option>
-                    <option value={100} className="bg-zinc-900">100</option>
-                  </select>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setCurrentPage(1)}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  最初
-                </button>
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  前へ
-                </button>
-
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
-                    }
-
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => setCurrentPage(pageNum)}
-                        className={`px-3 py-1 rounded-lg backdrop-blur-sm border text-sm transition-all ${
-                          currentPage === pageNum
-                            ? "bg-white/30 border-white/40 text-white font-semibold"
-                            : "bg-white/10 border-white/20 text-white/70 hover:bg-white/20"
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  次へ
-                </button>
-                <button
-                  onClick={() => setCurrentPage(totalPages)}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  最後
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div className="overflow-x-auto">
-            {paginatedActivities.length > 0 ? (
-              <table className="min-w-full divide-y divide-white/10">
-                <thead className="bg-white/5">
-                  <tr>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white/70 cursor-pointer hover:bg-white/10 transition-colors"
-                      onClick={() => handleSort("user")}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span>ユーザー</span>
-                        <div className="flex flex-col">
-                          {sortColumn === "user" ? (
-                            sortDirection === "asc" ? (
-                              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                              </svg>
-                            ) : (
-                              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            )
-                          ) : (
-                            <div className="flex flex-col -space-y-1">
-                              <svg className="w-2 h-2 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                              </svg>
-                              <svg className="w-2 h-2 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </th>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white/70 cursor-pointer hover:bg-white/10 transition-colors"
-                      onClick={() => handleSort("action")}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span>アクション</span>
-                        <div className="flex flex-col">
-                          {sortColumn === "action" ? (
-                            sortDirection === "asc" ? (
-                              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                              </svg>
-                            ) : (
-                              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            )
-                          ) : (
-                            <div className="flex flex-col -space-y-1">
-                              <svg className="w-2 h-2 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                              </svg>
-                              <svg className="w-2 h-2 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </th>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white/70 cursor-pointer hover:bg-white/10 transition-colors"
-                      onClick={() => handleSort("datetime")}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span>日時</span>
-                        <div className="flex flex-col">
-                          {sortColumn === "datetime" ? (
-                            sortDirection === "asc" ? (
-                              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                              </svg>
-                            ) : (
-                              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            )
-                          ) : (
-                            <div className="flex flex-col -space-y-1">
-                              <svg className="w-2 h-2 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                              </svg>
-                              <svg className="w-2 h-2 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </th>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white/70 cursor-pointer hover:bg-white/10 transition-colors"
-                      onClick={() => handleSort("status")}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span>ステータス</span>
-                        <div className="flex flex-col">
-                          {sortColumn === "status" ? (
-                            sortDirection === "asc" ? (
-                              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                              </svg>
-                            ) : (
-                              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            )
-                          ) : (
-                            <div className="flex flex-col -space-y-1">
-                              <svg className="w-2 h-2 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                              </svg>
-                              <svg className="w-2 h-2 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/10">
-                  {paginatedActivities.map((activity) => (
-                    <tr key={activity.id} className="hover:bg-white/5 transition-colors">
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-white font-medium">
-                        {activity.user}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-white/80">
-                        {activity.action}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-white/70">
-                        {activity.datetime}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4">
-                        <span
-                          className={`inline-flex rounded-full backdrop-blur-sm border px-3 py-1 text-xs font-semibold ${
-                            activity.status === "成功"
-                              ? "bg-green-500/20 border-green-400/30 text-green-200"
-                              : "bg-yellow-500/20 border-yellow-400/30 text-yellow-200"
-                          }`}
-                        >
-                          {activity.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div className="px-6 py-12 text-center">
-                <svg className="mx-auto h-12 w-12 text-white/50 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p className="text-white/70 text-sm">検索結果が見つかりませんでした</p>
-              </div>
-            )}
-          </div>
-
-          {/* ページネーション */}
-          {sortedActivities.length > 0 && (
-            <div className="px-6 py-4 border-t border-white/20 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="text-sm text-white/70">
-                  全 {sortedActivities.length} 件中 {startIndex + 1} - {Math.min(endIndex, sortedActivities.length)} 件を表示
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-white/70">表示件数:</span>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                    className="px-3 py-1 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
-                  >
-                    <option value={10} className="bg-zinc-900">10</option>
-                    <option value={20} className="bg-zinc-900">20</option>
-                    <option value={50} className="bg-zinc-900">50</option>
-                    <option value={100} className="bg-zinc-900">100</option>
-                  </select>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setCurrentPage(1)}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  最初
-                </button>
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  前へ
-                </button>
-
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
-                    }
-
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => setCurrentPage(pageNum)}
-                        className={`px-3 py-1 rounded-lg backdrop-blur-sm border text-sm transition-all ${
-                          currentPage === pageNum
-                            ? "bg-white/30 border-white/40 text-white font-semibold"
-                            : "bg-white/10 border-white/20 text-white/70 hover:bg-white/20"
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  次へ
-                </button>
-                <button
-                  onClick={() => setCurrentPage(totalPages)}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  最後
-                </button>
-              </div>
-            </div>
-          )}
+          <DataTable
+            data={activities}
+            columns={columns}
+            searchPlaceholder="ユーザー、アクション、日時、ステータスで検索..."
+          />
         </div>
       </main>
     </div>
   );
 }
-

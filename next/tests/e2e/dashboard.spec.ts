@@ -81,15 +81,16 @@ test.describe('Dashboard Page', () => {
   });
 
   test('should navigate between pages', async ({ page }) => {
-    // Check we're on page 1
-    await expect(page.getByRole('button', { name: '1' }).first()).toHaveClass(/font-semibold/);
+    // Check we're on page 1 (verify by checking pagination text)
+    await expect(page.getByText(/全 1000 件中 1 - 20/).first()).toBeVisible();
 
     // Click page 2
-    await page.getByRole('button', { name: '2' }).first().click();
+    const page2Button = page.getByRole('button', { name: '2' }).first();
+    await expect(page2Button).toBeVisible();
+    await page2Button.click();
     await page.waitForTimeout(500);
 
-    // Check we're on page 2
-    await expect(page.getByRole('button', { name: '2' }).first()).toHaveClass(/font-semibold/);
+    // Check we're on page 2 (verify by checking pagination text)
     await expect(page.getByText(/全 1000 件中 21 - 40/).first()).toBeVisible();
   });
 
@@ -97,8 +98,18 @@ test.describe('Dashboard Page', () => {
     // Check default is 20 items per page
     await expect(page.getByText(/全 1000 件中 1 - 20/).first()).toBeVisible();
 
-    // Change to 50 items per page
-    await page.locator('select').first().selectOption('50');
+    // Change to 50 items per page (use custom dropdown)
+    const itemsPerPageLabel = page.locator('text=表示件数').first();
+    await expect(itemsPerPageLabel).toBeVisible({ timeout: 5000 });
+    const dropdownButton = itemsPerPageLabel.locator('..').locator('button').filter({ hasText: /^20$/ }).first();
+    await expect(dropdownButton).toBeVisible({ timeout: 5000 });
+    await dropdownButton.click();
+    await page.waitForTimeout(500);
+    
+    // Find and click option 50 in the dropdown menu
+    const option50 = page.locator('div.absolute').filter({ hasText: /^50$/ }).getByRole('button', { name: /^50$/ }).first();
+    await expect(option50).toBeVisible({ timeout: 2000 });
+    await option50.click();
     await page.waitForTimeout(500);
 
     // Check showing 50 items

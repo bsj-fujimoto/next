@@ -1,3 +1,6 @@
+import { memo, useCallback } from "react";
+import ItemsPerPageDropdown from "./ItemsPerPageDropdown";
+
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
@@ -10,7 +13,7 @@ interface PaginationProps {
   onItemsPerPageChange: (itemsPerPage: number) => void;
 }
 
-export default function Pagination({
+function Pagination({
   currentPage,
   totalPages,
   totalItems,
@@ -23,6 +26,26 @@ export default function Pagination({
 }: PaginationProps) {
   if (totalItems === 0) return null;
 
+  const handleFirstPage = useCallback(() => {
+    onPageChange(1);
+  }, [onPageChange]);
+
+  const handlePreviousPage = useCallback(() => {
+    onPageChange(Math.max(1, currentPage - 1));
+  }, [onPageChange, currentPage]);
+
+  const handleNextPage = useCallback(() => {
+    onPageChange(Math.min(totalPages, currentPage + 1));
+  }, [onPageChange, totalPages, currentPage]);
+
+  const handleLastPage = useCallback(() => {
+    onPageChange(totalPages);
+  }, [onPageChange, totalPages]);
+
+  const handlePageClick = useCallback((pageNum: number) => {
+    onPageChange(pageNum);
+  }, [onPageChange]);
+
   return (
     <div className="px-6 py-4 border-t border-white/20 flex items-center justify-between">
       <div className="flex items-center gap-4">
@@ -31,29 +54,23 @@ export default function Pagination({
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm text-white/70">表示件数:</span>
-          <select
+          <ItemsPerPageDropdown
             value={itemsPerPage}
-            onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
-            className="px-3 py-1 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
-          >
-            {itemsPerPageOptions.map((option) => (
-              <option key={option} value={option} className="bg-zinc-900">
-                {option}
-              </option>
-            ))}
-          </select>
+            options={itemsPerPageOptions}
+            onChange={onItemsPerPageChange}
+          />
         </div>
       </div>
       <div className="flex items-center gap-2">
         <button
-          onClick={() => onPageChange(1)}
+          onClick={handleFirstPage}
           disabled={currentPage === 1}
           className="px-3 py-1 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           最初
         </button>
         <button
-          onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+          onClick={handlePreviousPage}
           disabled={currentPage === 1}
           className="px-3 py-1 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
@@ -76,7 +93,7 @@ export default function Pagination({
             return (
               <button
                 key={pageNum}
-                onClick={() => onPageChange(pageNum)}
+                onClick={handlePageClick.bind(null, pageNum)}
                 className={`px-3 py-1 rounded-lg backdrop-blur-sm border text-sm transition-all ${
                   currentPage === pageNum
                     ? "bg-white/30 border-white/40 text-white font-semibold"
@@ -90,14 +107,14 @@ export default function Pagination({
         </div>
 
         <button
-          onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+          onClick={handleNextPage}
           disabled={currentPage === totalPages}
           className="px-3 py-1 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           次へ
         </button>
         <button
-          onClick={() => onPageChange(totalPages)}
+          onClick={handleLastPage}
           disabled={currentPage === totalPages}
           className="px-3 py-1 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
@@ -107,4 +124,6 @@ export default function Pagination({
     </div>
   );
 }
+
+export default memo(Pagination);
 
