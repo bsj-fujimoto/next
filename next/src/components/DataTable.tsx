@@ -53,14 +53,34 @@ export default function DataTable<T extends Record<string, unknown>>({
     return [...filteredData].sort((a, b) => {
       if (!sortColumn) return 0;
 
-      const aValue = String(a[sortColumn] || "");
-      const bValue = String(b[sortColumn] || "");
+      // ソート対象のカラム定義を取得
+      const column = columns.find((col) => col.key === sortColumn);
+      const sortType = column?.sortType || "string";
 
-      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-      return 0;
+      let comparison = 0;
+
+      if (sortType === "number") {
+        // 数値としてソート
+        const aValue = Number(a[sortColumn]) || 0;
+        const bValue = Number(b[sortColumn]) || 0;
+        comparison = aValue - bValue;
+      } else if (sortType === "date") {
+        // 日付としてソート
+        const aValue = new Date(String(a[sortColumn] || "")).getTime();
+        const bValue = new Date(String(b[sortColumn] || "")).getTime();
+        comparison = aValue - bValue;
+      } else {
+        // 文字列としてソート（デフォルト）
+        const aValue = String(a[sortColumn] || "").toLowerCase();
+        const bValue = String(b[sortColumn] || "").toLowerCase();
+        if (aValue < bValue) comparison = -1;
+        else if (aValue > bValue) comparison = 1;
+        else comparison = 0;
+      }
+
+      return sortDirection === "asc" ? comparison : -comparison;
     });
-  }, [filteredData, sortColumn, sortDirection]);
+  }, [filteredData, sortColumn, sortDirection, columns]);
 
   // ページネーション計算
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
@@ -121,7 +141,7 @@ export default function DataTable<T extends Record<string, unknown>>({
               {paginatedData.map((item, index) => {
                 const key = getRowKey ? getRowKey(item, index) : (item.id ?? index);
                 return (
-                  <TableRow key={key} item={item} columns={columns} index={index} />
+                  <TableRow key={String(key)} item={item} columns={columns} index={index} />
                 );
               })}
             </tbody>

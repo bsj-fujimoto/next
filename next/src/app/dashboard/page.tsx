@@ -8,7 +8,7 @@ import { useRequireAuth } from "@/hooks/useAuth";
 import { logout } from "@/utils/auth";
 import type { Column } from "@/types/table";
 
-interface Activity {
+interface Activity extends Record<string, unknown> {
   id: number;
   user: string;
   action: string;
@@ -66,9 +66,10 @@ export default function DashboardPage() {
   }, []);
 
   const columns: Column<Activity>[] = [
+    { key: "id", label: "ID", sortable: true, sortType: "number" },
     { key: "user", label: "ユーザー", sortable: true },
     { key: "action", label: "アクション", sortable: true },
-    { key: "datetime", label: "日時", sortable: true },
+    { key: "datetime", label: "日時", sortable: true, sortType: "date" },
     { key: "status", label: "ステータス", sortable: true },
   ];
 

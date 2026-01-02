@@ -1,10 +1,5 @@
 import { memo } from "react";
-
-interface Column<T> {
-  key: keyof T;
-  label: string;
-  sortable?: boolean;
-}
+import type { Column } from "@/types/table";
 
 interface TableRowProps<T> {
   item: T;
