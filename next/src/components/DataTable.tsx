@@ -20,7 +20,7 @@ interface DataTableProps<T> {
   getRowKey?: (item: T, index: number) => string | number;
 }
 
-export default function DataTable<T extends Record<string, any>>({
+export default function DataTable<T extends Record<string, unknown>>({
   data,
   columns,
   searchable = true,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import DataTable from "@/components/DataTable";
@@ -35,9 +35,13 @@ export default function ComponentsPage() {
   const [componentSearchQuery, setComponentSearchQuery] = useState("");
   const [expandedComponents, setExpandedComponents] = useState<Set<string>>(new Set(["DataTable"]));
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-  };
+  const copyToClipboard = useCallback(async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (err) {
+      console.error('Failed to copy text to clipboard:', err);
+    }
+  }, []);
 
   // ダミーデータ
   const components: ComponentItem[] = Array.from({ length: 100 }, (_, i) => ({

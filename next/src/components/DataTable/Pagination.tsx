@@ -1,3 +1,4 @@
+import { memo } from "react";
 import ItemsPerPageDropdown from "./ItemsPerPageDropdown";
 
 interface PaginationProps {
@@ -103,4 +104,6 @@ export default function Pagination({
     </div>
   );
 }
+
+export default memo(Pagination);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, memo } from "react";
 
 interface ItemsPerPageDropdownProps {
   value: number;
@@ -8,7 +8,7 @@ interface ItemsPerPageDropdownProps {
   onChange: (value: number) => void;
 }
 
-export default function ItemsPerPageDropdown({
+function ItemsPerPageDropdown({
   value,
   options,
   onChange,
@@ -78,4 +78,6 @@ export default function ItemsPerPageDropdown({
     </div>
   );
 }
+
+export default memo(ItemsPerPageDropdown);
 

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import SortableHeader from "./SortableHeader";
 
 interface Column<T> {
@@ -13,7 +14,7 @@ interface TableHeaderProps<T> {
   onSort: (column: keyof T) => void;
 }
 
-export default function TableHeader<T extends Record<string, any>>({
+function TableHeader<T extends Record<string, unknown>>({
   columns,
   sortColumn,
   sortDirection,
@@ -37,4 +38,6 @@ export default function TableHeader<T extends Record<string, any>>({
     </thead>
   );
 }
+
+export default memo(TableHeader) as typeof TableHeader;
 

@@ -1,10 +1,12 @@
+import { memo } from "react";
+
 interface SearchBarProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
 }
 
-export default function SearchBar({ value, onChange, placeholder = "検索..." }: SearchBarProps) {
+function SearchBar({ value, onChange, placeholder = "検索..." }: SearchBarProps) {
   return (
     <div className="relative">
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -22,4 +24,6 @@ export default function SearchBar({ value, onChange, placeholder = "検索..." }
     </div>
   );
 }
+
+export default memo(SearchBar);
 

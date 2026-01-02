@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 interface Column<T> {
   key: keyof T;
   label: string;
@@ -10,7 +12,7 @@ interface TableRowProps<T> {
   index: number;
 }
 
-export default function TableRow<T extends Record<string, any>>({
+function TableRow<T extends Record<string, unknown>>({
   item,
   columns,
   index,
@@ -25,4 +27,6 @@ export default function TableRow<T extends Record<string, any>>({
     </tr>
   );
 }
+
+export default memo(TableRow) as typeof TableRow;
 
