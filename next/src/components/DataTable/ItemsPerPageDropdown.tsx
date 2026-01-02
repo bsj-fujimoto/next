@@ -31,10 +31,6 @@ function ItemsPerPageDropdown({
   const trigger = (
     <button
       type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        setIsOpen(!isOpen);
-      }}
       className="flex items-center gap-2 px-3 py-1 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
     >
       <span>{value}</span>
