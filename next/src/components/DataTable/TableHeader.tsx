@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import SortableHeader from "./SortableHeader";
 
 interface Column<T> {
@@ -20,6 +20,19 @@ function TableHeader<T extends Record<string, unknown>>({
   sortDirection,
   onSort,
 }: TableHeaderProps<T>) {
+  // 各カラムのソートハンドラーをメモ化
+  const sortHandlers = useMemo(() => {
+    const handlers = new Map<string, () => void>();
+    columns.forEach((column) => {
+      handlers.set(String(column.key), () => {
+        if (column.sortable !== false) {
+          onSort(column.key);
+        }
+      });
+    });
+    return handlers;
+  }, [columns, onSort]);
+
   return (
     <thead className="bg-white/5">
       <tr>
@@ -30,7 +43,7 @@ function TableHeader<T extends Record<string, unknown>>({
             sortColumn={sortColumn ? String(sortColumn) : null}
             sortDirection={sortDirection}
             currentColumn={String(column.key)}
-            onSort={() => column.sortable !== false && onSort(column.key)}
+            onSort={sortHandlers.get(String(column.key))}
             sortable={column.sortable !== false}
           />
         ))}

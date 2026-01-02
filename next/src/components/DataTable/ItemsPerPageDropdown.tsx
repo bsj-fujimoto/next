@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, memo } from "react";
+import { useState, useRef, useEffect, memo, useCallback } from "react";
 
 interface ItemsPerPageDropdownProps {
   value: number;
@@ -32,16 +32,24 @@ function ItemsPerPageDropdown({
     };
   }, [isOpen]);
 
-  const handleSelect = (option: number) => {
+  const handleToggle = useCallback(() => {
+    setIsOpen((prev) => !prev);
+  }, []);
+
+  const handleSelect = useCallback((option: number) => {
     onChange(option);
     setIsOpen(false);
-  };
+  }, [onChange]);
+
+  const createSelectHandler = useCallback((option: number) => {
+    return () => handleSelect(option);
+  }, [handleSelect]);
 
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleToggle}
         className="flex items-center gap-2 px-3 py-1 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all"
       >
         <span>{value}</span>
@@ -63,7 +71,7 @@ function ItemsPerPageDropdown({
             <button
               key={option}
               type="button"
-              onClick={() => handleSelect(option)}
+              onClick={createSelectHandler(option)}
               className={`w-full text-left px-3 py-2 text-sm transition-all ${
                 value === option
                   ? "bg-indigo-100 text-indigo-900 font-semibold"
