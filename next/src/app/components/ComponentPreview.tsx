@@ -139,11 +139,14 @@ export default function ComponentPreview({
 
       // DropdownMenuの場合は特別な処理
       if (displayData.previewComponent === "DropdownMenu") {
-        // triggerが文字列の場合は、ボタン要素に変換
+        // triggerが文字列（JSX文字列）の場合は、ボタン要素に変換
         if (typeof processedProps.trigger === 'string') {
+          // JSX文字列からテキストを抽出（<button ...>テキスト</button>の形式）
+          const textMatch = processedProps.trigger.match(/>([^<]+)</);
+          const buttonText = textMatch ? textMatch[1] : processedProps.trigger;
           processedProps.trigger = (
             <button className="px-4 py-2 bg-blue-500 text-white rounded">
-              {processedProps.trigger}
+              {buttonText}
             </button>
           );
         }
