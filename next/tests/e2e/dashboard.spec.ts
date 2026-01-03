@@ -150,14 +150,16 @@ test.describe('Dashboard Page', () => {
     if (menuElement && statCardElement) {
       // Menu should be visible and not hidden behind other elements
       // Check that menu is clickable (not covered by other elements)
-      const menuCenterX = menuElement.x + menuElement.width / 2;
-      const menuCenterY = menuElement.y + menuElement.height / 2;
+      // Check top-left corner of menu (not center, as center might be on a menuitem)
+      const menuTopX = menuElement.x + 5;
+      const menuTopY = menuElement.y + 5;
       const elementAtMenuPosition = await page.evaluate(({ x, y }) => {
-        return document.elementFromPoint(x, y)?.getAttribute('role');
-      }, { x: menuCenterX, y: menuCenterY });
+        const element = document.elementFromPoint(x, y);
+        return element?.getAttribute('role') || element?.closest('[role="menu"]')?.getAttribute('role');
+      }, { x: menuTopX, y: menuTopY });
       
-      // Menu should be the topmost element at its position
-      expect(elementAtMenuPosition).toBe('menu');
+      // Menu should be the topmost element at its position (or a menuitem within the menu)
+      expect(['menu', 'menuitem']).toContain(elementAtMenuPosition);
     }
   });
 
