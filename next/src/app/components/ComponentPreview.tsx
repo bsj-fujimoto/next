@@ -110,6 +110,12 @@ export default function ComponentPreview({
       const processedProps = Object.entries(displayData.previewProps).reduce((acc, [key, value]) => {
         if (typeof value === 'string' && (value === '() => {}' || value.startsWith('() =>'))) {
           acc[key] = () => {};
+        } else if (key === 'items' && Array.isArray(value)) {
+          // items配列のonClickを関数に変換
+          acc[key] = value.map((item: any) => ({
+            ...item,
+            onClick: typeof item.onClick === 'string' ? (() => {}) : item.onClick,
+          }));
         } else {
           acc[key] = value;
         }
@@ -129,6 +135,18 @@ export default function ComponentPreview({
             {...processedProps}
           />
         );
+      }
+
+      // DropdownMenuの場合は特別な処理
+      if (displayData.previewComponent === "DropdownMenu") {
+        // triggerが文字列の場合は、ボタン要素に変換
+        if (typeof processedProps.trigger === 'string') {
+          processedProps.trigger = (
+            <button className="px-4 py-2 bg-blue-500 text-white rounded">
+              {processedProps.trigger}
+            </button>
+          );
+        }
       }
 
       // その他のコンポーネントのプレビュー
