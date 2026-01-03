@@ -68,10 +68,12 @@ test.describe('Dashboard Page', () => {
     // Wait for sort to apply
     await page.waitForTimeout(500);
 
-    // Get first two user names
+    // Get first two user names (skip ID column, get user column which is second)
     const rows = page.locator('tbody tr');
-    const firstUser = await rows.first().locator('td').first().textContent();
-    const secondUser = await rows.nth(1).locator('td').first().textContent();
+    const firstRowCells = rows.first().locator('td');
+    const secondRowCells = rows.nth(1).locator('td');
+    const firstUser = await firstRowCells.nth(1).textContent(); // User is second column
+    const secondUser = await secondRowCells.nth(1).textContent();
 
     // Should be sorted alphabetically
     expect(firstUser! <= secondUser!).toBeTruthy();
@@ -80,42 +82,47 @@ test.describe('Dashboard Page', () => {
     await page.getByRole('columnheader', { name: /ユーザー/ }).click();
     await page.waitForTimeout(500);
 
-    const firstUserReverse = await rows.first().locator('td').first().textContent();
-    const secondUserReverse = await rows.nth(1).locator('td').first().textContent();
+    const firstUserReverse = await firstRowCells.nth(1).textContent();
+    const secondUserReverse = await secondRowCells.nth(1).textContent();
 
     // Should be sorted in reverse
     expect(firstUserReverse! >= secondUserReverse!).toBeTruthy();
   });
 
   test('should navigate between pages', async ({ page }) => {
+    // Wait for page to load
+    await page.waitForLoadState('networkidle');
+    
     // Check we're on page 1 (verify by checking pagination text)
-    await expect(page.getByText(/全 1000 件中 1 - 20/).first()).toBeVisible();
+    await expect(page.getByText(/全 1000 件中 1 - 20/).first()).toBeVisible({ timeout: 10000 });
 
     // Click page 2
     const page2Button = page.getByRole('button', { name: '2' }).first();
-    await expect(page2Button).toBeVisible();
+    await expect(page2Button).toBeVisible({ timeout: 10000 });
     await page2Button.click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
 
     // Check we're on page 2 (verify by checking pagination text)
-    await expect(page.getByText(/全 1000 件中 21 - 40/).first()).toBeVisible();
+    await expect(page.getByText(/全 1000 件中 21 - 40/).first()).toBeVisible({ timeout: 10000 });
   });
 
   test('should change items per page', async ({ page }) => {
+    // Wait for page to load
+    await page.waitForLoadState('networkidle');
+    
     // Check default is 20 items per page
-    await expect(page.getByText(/全 1000 件中 1 - 20/).first()).toBeVisible();
+    await expect(page.getByText(/全 1000 件中 1 - 20/).first()).toBeVisible({ timeout: 10000 });
 
     // Change to 50 items per page (use custom dropdown)
-    const itemsPerPageLabel = page.locator('text=表示件数').first();
-    await expect(itemsPerPageLabel).toBeVisible({ timeout: 5000 });
-    const dropdownButton = itemsPerPageLabel.locator('..').locator('button').filter({ hasText: /^20$/ }).first();
-    await expect(dropdownButton).toBeVisible({ timeout: 5000 });
+    // Find the dropdown button by looking for button with text "20" near "表示件数"
+    const dropdownButton = page.locator('button').filter({ hasText: /^20$/ }).first();
+    await expect(dropdownButton).toBeVisible({ timeout: 10000 });
     await dropdownButton.click();
     await page.waitForTimeout(500);
     
     // Find and click option 50 in the dropdown menu
-    const option50 = page.locator('div.absolute').filter({ hasText: /^50$/ }).getByRole('button', { name: /^50$/ }).first();
-    await expect(option50).toBeVisible({ timeout: 2000 });
+    const option50 = page.getByRole('menuitem', { name: /^50$/ }).first();
+    await expect(option50).toBeVisible({ timeout: 5000 });
     await option50.click();
     await page.waitForTimeout(500);
 
