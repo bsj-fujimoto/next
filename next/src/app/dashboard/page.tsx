@@ -34,15 +34,22 @@ export default function DashboardPage() {
 
     const result: Activity[] = [];
     const now = new Date("2024-01-15 12:00");
+    
+    // Use a fixed seed for consistent server/client rendering
+    let seed = 12345;
+    const seededRandom = () => {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    };
 
     for (let i = 1; i <= 1000; i++) {
-      const randomUser = users[Math.floor(Math.random() * users.length)];
-      const randomAction = actions[Math.floor(Math.random() * actions.length)];
-      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+      const randomUser = users[Math.floor(seededRandom() * users.length)];
+      const randomAction = actions[Math.floor(seededRandom() * actions.length)];
+      const randomStatus = statuses[Math.floor(seededRandom() * statuses.length)];
 
-      const randomDaysAgo = Math.floor(Math.random() * 30);
-      const randomHours = Math.floor(Math.random() * 24);
-      const randomMinutes = Math.floor(Math.random() * 60);
+      const randomDaysAgo = Math.floor(seededRandom() * 30);
+      const randomHours = Math.floor(seededRandom() * 24);
+      const randomMinutes = Math.floor(seededRandom() * 60);
 
       const activityDate = new Date(now);
       activityDate.setDate(activityDate.getDate() - randomDaysAgo);

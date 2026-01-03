@@ -122,7 +122,7 @@ function AvatarDropdown({ className = "" }: AvatarDropdownProps) {
       items={menuItems}
       align="right"
       className={className}
-      menuClassName="min-w-[200px]"
+      menuClassName="min-w-[220px]"
     />
   );
 }

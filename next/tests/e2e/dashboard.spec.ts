@@ -152,9 +152,9 @@ test.describe('Dashboard Page', () => {
       // Check that menu is clickable (not covered by other elements)
       const menuCenterX = menuElement.x + menuElement.width / 2;
       const menuCenterY = menuElement.y + menuElement.height / 2;
-      const elementAtMenuPosition = await page.evaluate((x, y) => {
+      const elementAtMenuPosition = await page.evaluate(({ x, y }) => {
         return document.elementFromPoint(x, y)?.getAttribute('role');
-      }, menuCenterX, menuCenterY);
+      }, { x: menuCenterX, y: menuCenterY });
       
       // Menu should be the topmost element at its position
       expect(elementAtMenuPosition).toBe('menu');
