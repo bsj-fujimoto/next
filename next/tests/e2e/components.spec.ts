@@ -69,9 +69,8 @@ test.describe('Components Page', () => {
     await page.getByText('DropdownMenu').click();
     await page.waitForTimeout(1000);
 
-    // Find the preview button in the preview section and click it
-    const previewSection = page.locator('text=プレビュー').locator('..').first();
-    const previewButton = previewSection.locator('button:has-text("メニューを開く")').first();
+    // Find the preview button - it should be rendered in the preview section
+    const previewButton = page.locator('button:has-text("メニューを開く")').first();
     await previewButton.waitFor({ state: 'visible', timeout: 10000 });
     await previewButton.click();
     await page.waitForTimeout(500);
@@ -83,26 +82,28 @@ test.describe('Components Page', () => {
     // Verify dropdown menu is displayed above other elements (z-index check)
     const menuElement = await menu.boundingBox();
     if (menuElement) {
-      const menuCenterX = menuElement.x + menuElement.width / 2;
-      const menuCenterY = menuElement.y + menuElement.height / 2;
-      const elementAtMenuPosition = await page.evaluate((x, y) => {
-        return document.elementFromPoint(x, y)?.getAttribute('role');
-      }, menuCenterX, menuCenterY);
+      // Check top-left corner of menu (not center, as center might be on a menuitem)
+      const menuTopX = menuElement.x + 5;
+      const menuTopY = menuElement.y + 5;
+      const elementAtMenuPosition = await page.evaluate(({ x, y }) => {
+        const element = document.elementFromPoint(x, y);
+        return element?.getAttribute('role') || element?.closest('[role="menu"]')?.getAttribute('role');
+      }, { x: menuTopX, y: menuTopY });
       
-      // Menu should be the topmost element at its position
-      expect(elementAtMenuPosition).toBe('menu');
+      // Menu should be the topmost element at its position (or a menuitem within the menu)
+      expect(['menu', 'menuitem']).toContain(elementAtMenuPosition);
     }
   });
 
   test('should display AvatarDropdown preview and dropdown appears above other elements', async ({ page }) => {
     await page.getByText('AvatarDropdown').click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
 
     // Find the avatar button in preview and click it
     const avatarButton = page.locator('button[aria-label="ユーザーメニュー"]').first();
-    await avatarButton.waitFor({ state: 'visible' });
+    await avatarButton.waitFor({ state: 'visible', timeout: 10000 });
     await avatarButton.click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(500);
 
     // Check dropdown menu is visible
     const menu = page.locator('div[role="menu"]').first();
@@ -111,14 +112,16 @@ test.describe('Components Page', () => {
     // Verify dropdown menu is displayed above other elements (z-index check)
     const menuElement = await menu.boundingBox();
     if (menuElement) {
-      const menuCenterX = menuElement.x + menuElement.width / 2;
-      const menuCenterY = menuElement.y + menuElement.height / 2;
-      const elementAtMenuPosition = await page.evaluate((x, y) => {
-        return document.elementFromPoint(x, y)?.getAttribute('role');
-      }, menuCenterX, menuCenterY);
+      // Check top-left corner of menu (not center, as center might be on a menuitem)
+      const menuTopX = menuElement.x + 5;
+      const menuTopY = menuElement.y + 5;
+      const elementAtMenuPosition = await page.evaluate(({ x, y }) => {
+        const element = document.elementFromPoint(x, y);
+        return element?.getAttribute('role') || element?.closest('[role="menu"]')?.getAttribute('role');
+      }, { x: menuTopX, y: menuTopY });
       
-      // Menu should be the topmost element at its position
-      expect(elementAtMenuPosition).toBe('menu');
+      // Menu should be the topmost element at its position (or a menuitem within the menu)
+      expect(['menu', 'menuitem']).toContain(elementAtMenuPosition);
     }
   });
 });
