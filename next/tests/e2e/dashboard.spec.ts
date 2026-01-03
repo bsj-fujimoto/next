@@ -101,17 +101,7 @@ test.describe('Dashboard Page', () => {
     await expect(page2Button).toBeVisible({ timeout: 10000 });
     await page2Button.click();
     
-    // Wait for pagination to update
-    await page.waitForTimeout(1000);
-    await page.waitForFunction(
-      () => {
-        const text = document.body.textContent || '';
-        return text.includes('全 1000 件中 21 - 40');
-      },
-      { timeout: 10000 }
-    );
-
-    // Check we're on page 2 (verify by checking pagination text)
+    // Wait for pagination to update - check that we're on page 2
     await expect(page.getByText(/全 1000 件中 21 - 40/).first()).toBeVisible({ timeout: 10000 });
   });
 
