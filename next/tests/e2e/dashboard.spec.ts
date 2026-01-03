@@ -94,7 +94,7 @@ test.describe('Dashboard Page', () => {
     await page.waitForLoadState('networkidle');
     
     // Check we're on page 1 (verify by checking pagination text)
-    await expect(page.getByText(/全 1000 件中 1 - 20/).first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/全 1000 件中 1 - 20 件を表示/).first()).toBeVisible({ timeout: 10000 });
 
     // Click page 2
     const page2Button = page.getByRole('button', { name: '2' }).first();
@@ -102,7 +102,7 @@ test.describe('Dashboard Page', () => {
     await page2Button.click();
     
     // Wait for pagination to update - check that we're on page 2
-    await expect(page.getByText(/全 1000 件中 21 - 40/).first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/全 1000 件中 21 - 40 件を表示/).first()).toBeVisible({ timeout: 10000 });
   });
 
   test('should change items per page', async ({ page }) => {
@@ -110,7 +110,7 @@ test.describe('Dashboard Page', () => {
     await page.waitForLoadState('networkidle');
     
     // Check default is 20 items per page
-    await expect(page.getByText(/全 1000 件中 1 - 20/).first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/全 1000 件中 1 - 20 件を表示/).first()).toBeVisible({ timeout: 10000 });
 
     // Change to 50 items per page (use custom dropdown)
     // Find the dropdown button by looking for button with text "20" near "表示件数"
