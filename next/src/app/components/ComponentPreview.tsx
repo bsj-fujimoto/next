@@ -328,6 +328,12 @@ export default function ComponentPreview({
           p({ children }: any) {
             return <p className="text-white/70 text-sm mb-2">{children}</p>;
           },
+          ul({ children }: any) {
+            return <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>;
+          },
+          li({ children }: any) {
+            return <li className="text-white/70 text-sm">{children}</li>;
+          },
         }}
       >
         {contentWithoutPreview}
@@ -356,8 +362,8 @@ export default function ComponentPreview({
 
       {/* プレビューセクション */}
       {previewElement && (
-        <div className="mb-6">
-          <GlassCard padding="lg">
+        <div className="mb-6 relative z-20 isolate">
+          <GlassCard padding="lg" className="relative isolate">
             <h3 className="text-lg font-semibold text-white mb-4">プレビュー</h3>
             {(displayData.previewComponent === "Button" || componentData.id === "Button") ? (
               <div className="flex flex-wrap gap-4">
@@ -387,10 +393,13 @@ export default function ComponentPreview({
 
       {/* Markdownコンテンツまたは既存のコードサンプル */}
       {markdownData ? (
-        <div className="backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 shadow-2xl p-6">
+        <div className="backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 shadow-2xl p-6 relative z-0 mb-6">
           {renderMarkdownContent()}
         </div>
-      ) : (displayData.codeSample || (displayData.variations && displayData.variations.length > 0)) ? (
+      ) : null}
+
+      {/* 既存のコードサンプル */}
+      {!markdownData && (displayData.codeSample || (displayData.variations && displayData.variations.length > 0)) ? (
         <>
           {displayData.codeSample && (
             <div className="mt-6 backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 shadow-2xl p-6">
