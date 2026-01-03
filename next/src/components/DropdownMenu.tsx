@@ -132,7 +132,7 @@ function DropdownMenu({
         <div
           role="menu"
           aria-orientation="vertical"
-          className={`absolute ${align === "right" ? "right-0" : "left-0"} top-full mt-1 z-[100] min-w-full rounded-lg border border-gray-200 shadow-xl overflow-hidden bg-white ${menuClassName}`}
+          className={`absolute ${align === "right" ? "right-0" : "left-0"} top-full mt-1 z-[100] rounded-lg border border-gray-200 shadow-xl overflow-hidden bg-white ${menuClassName || 'min-w-full'}`}
         >
           {items.map((item, index) => (
             <button
