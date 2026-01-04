@@ -60,7 +60,7 @@ export function parseComponentMarkdown(markdown: string): ComponentMarkdown {
  */
 export function loadComponentMarkdown(componentId: string): ComponentMarkdown | null {
   try {
-    const filePath = path.join(process.cwd(), "src/app/components/docs", `${componentId}.md`);
+    const filePath = path.join(process.cwd(), "docs/components", `${componentId}.md`);
     const fileContents = fs.readFileSync(filePath, "utf8");
     return parseComponentMarkdown(fileContents);
   } catch (error) {
@@ -74,7 +74,7 @@ export function loadComponentMarkdown(componentId: string): ComponentMarkdown | 
  */
 export function loadAllComponentMarkdowns(): Map<string, ComponentMarkdown> {
   const markdowns = new Map<string, ComponentMarkdown>();
-  const docsDir = path.join(process.cwd(), "src/app/components/docs");
+  const docsDir = path.join(process.cwd(), "docs/components");
   
   try {
     const files = fs.readdirSync(docsDir);
