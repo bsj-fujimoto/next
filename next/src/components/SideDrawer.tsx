@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, memo, useCallback, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { DEFAULT_MENU_ITEMS } from "@/constants/menuItems.tsx";
+import { DEFAULT_MENU_ITEMS } from "@/constants/menuItems";
 import type React from "react";
 
 export interface SideDrawerMenuItem {
