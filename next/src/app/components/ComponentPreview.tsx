@@ -27,6 +27,7 @@ import StatusBadge from "@/components/StatusBadge";
 import Toast from "@/components/Toast";
 import DropdownMenu from "@/components/DropdownMenu";
 import AvatarDropdown from "@/components/AvatarDropdown";
+import SideDrawer from "@/components/SideDrawer";
 
 interface ComponentPreviewProps {
   componentData: ComponentItem;
@@ -58,6 +59,7 @@ const componentMap: Record<string, React.ComponentType<any>> = {
   Toast,
   DropdownMenu,
   AvatarDropdown,
+  SideDrawer,
 };
 
 export default function ComponentPreview({
@@ -229,6 +231,10 @@ export default function ComponentPreview({
           ],
         },
         AvatarDropdown: {},
+        SideDrawer: {
+          isOpen: true,
+          onClose: () => {},
+        },
       };
 
       const props = defaultProps[componentName] || {};
