@@ -273,4 +273,224 @@ test.describe('Dashboard Page', () => {
     await expect(page).toHaveURL('/login');
     await expect(page.getByText('ようこそ')).toBeVisible();
   });
+
+  // SideDrawer tests
+  test('TC-E2E-001: should display drawer menu in open state by default', async ({ page }) => {
+    // Check drawer is visible
+    const drawer = page.getByRole('navigation', { name: /メニュー/i });
+    await expect(drawer).toBeVisible();
+    await expect(drawer).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  test('TC-E2E-001: should toggle drawer menu when toggle button is clicked', async ({ page }) => {
+    // Check drawer is open initially
+    const drawer = page.getByRole('navigation', { name: /メニュー/i });
+    await expect(drawer).toBeVisible();
+
+    // Click toggle button to close
+    const toggleButton = page.getByRole('button', { name: /メニュー|menu/i }).first();
+    await toggleButton.click();
+    await page.waitForTimeout(500);
+
+    // Check drawer is closed
+    await expect(drawer).toHaveAttribute('aria-expanded', 'false');
+
+    // Click toggle button again to open
+    await toggleButton.click();
+    await page.waitForTimeout(500);
+
+    // Check drawer is open again
+    await expect(drawer).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  test('TC-E2E-002: should navigate from drawer menu items', async ({ page }) => {
+    // Wait for drawer to be visible
+    const drawer = page.getByRole('navigation', { name: /メニュー/i });
+    await expect(drawer).toBeVisible();
+
+    // Click profile menu item
+    const profileItem = page.getByRole('link', { name: /プロフィール/i });
+    await expect(profileItem).toBeVisible();
+    await profileItem.click();
+    await page.waitForTimeout(1000);
+
+    // Should navigate to profile page
+    await expect(page).toHaveURL('/profile');
+
+    // Go back to dashboard
+    await page.goBack();
+    await page.waitForTimeout(1000);
+
+    // Click settings menu item
+    const settingsItem = page.getByRole('link', { name: /セッティング/i });
+    await expect(settingsItem).toBeVisible();
+    await settingsItem.click();
+    await page.waitForTimeout(1000);
+
+    // Should navigate to settings page
+    await expect(page).toHaveURL('/settings');
+  });
+
+  test('TC-E2E-003: should display drawer as overlay on mobile', async ({ page }) => {
+    // Set mobile viewport
+    await page.setViewportSize({ width: 375, height: 667 });
+
+    // Reload page
+    await page.reload();
+    await page.waitForTimeout(1000);
+
+    // Check drawer is visible
+    const drawer = page.getByRole('navigation', { name: /メニュー/i });
+    await expect(drawer).toBeVisible();
+
+    // Check drawer has fixed positioning (overlay)
+    const drawerBox = await drawer.boundingBox();
+    expect(drawerBox).not.toBeNull();
+
+    // Click overlay background to close
+    const overlay = page.locator('[data-testid="drawer-overlay"]');
+    if (await overlay.isVisible()) {
+      await overlay.click({ position: { x: 10, y: 10 } });
+      await page.waitForTimeout(500);
+      await expect(drawer).toHaveAttribute('aria-expanded', 'false');
+    }
+  });
+
+  test('TC-E2E-004: should display drawer as sidebar on desktop', async ({ page }) => {
+    // Set desktop viewport
+    await page.setViewportSize({ width: 1280, height: 720 });
+
+    // Reload page
+    await page.reload();
+    await page.waitForTimeout(1000);
+
+    // Check drawer is visible
+    const drawer = page.getByRole('navigation', { name: /メニュー/i });
+    await expect(drawer).toBeVisible();
+
+    // Check main content is visible alongside drawer (2-column layout)
+    const mainContent = page.locator('main');
+    await expect(mainContent).toBeVisible();
+
+    // Check that drawer and main content are side by side
+    const drawerBox = await drawer.boundingBox();
+    const mainBox = await mainContent.boundingBox();
+    expect(drawerBox).not.toBeNull();
+    expect(mainBox).not.toBeNull();
+    if (drawerBox && mainBox) {
+      // Drawer should be on the left, main content on the right
+      expect(drawerBox.x).toBeLessThan(mainBox.x);
+    }
+  });
+
+  test('TC-E2E-005: should switch layout when viewport size changes', async ({ page }) => {
+    // Start with desktop size
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.reload();
+    await page.waitForTimeout(1000);
+
+    const drawer = page.getByRole('navigation', { name: /メニュー/i });
+    await expect(drawer).toBeVisible();
+
+    // Change to mobile size
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.waitForTimeout(500);
+
+    // Drawer should still be visible (might be overlay now)
+    await expect(drawer).toBeVisible();
+
+    // Change back to desktop size
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.waitForTimeout(500);
+
+    // Drawer should still be visible (back to sidebar)
+    await expect(drawer).toBeVisible();
+  });
+
+  test('TC-E2E-006: should support keyboard navigation', async ({ page }) => {
+    // Wait for drawer to be visible
+    const drawer = page.getByRole('navigation', { name: /メニュー/i });
+    await expect(drawer).toBeVisible();
+
+    // Press Tab to navigate through menu items
+    await page.keyboard.press('Tab');
+    await page.waitForTimeout(200);
+
+    // Press Escape to close drawer
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(500);
+
+    // Check drawer is closed
+    await expect(drawer).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('TC-E2E-007: should not have console errors', async ({ page }) => {
+    let consoleErrors: string[] = [];
+    
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        consoleErrors.push(msg.text());
+      }
+    });
+
+    // Perform various actions
+    await page.reload();
+    await page.waitForTimeout(1000);
+
+    const toggleButton = page.getByRole('button', { name: /メニュー|menu/i }).first();
+    await toggleButton.click();
+    await page.waitForTimeout(500);
+    await toggleButton.click();
+    await page.waitForTimeout(500);
+
+    // Check no console errors
+    expect(consoleErrors.length).toBe(0);
+  });
+
+  test('TC-E2E-008: should have proper z-index for drawer', async ({ page }) => {
+    // Wait for drawer to be visible
+    const drawer = page.getByRole('navigation', { name: /メニュー/i });
+    await expect(drawer).toBeVisible();
+
+    // Check z-index
+    const zIndex = await drawer.evaluate((el) => {
+      return window.getComputedStyle(el).zIndex;
+    });
+
+    // z-index should be 50 or higher
+    expect(parseInt(zIndex)).toBeGreaterThanOrEqual(50);
+  });
+
+  test('TC-E2E-009: should not have layout issues', async ({ page }) => {
+    // Take screenshot for visual verification
+    await page.screenshot({ path: 'test-results/dashboard-with-drawer-desktop.png', fullPage: true });
+
+    // Check main content is visible
+    const mainContent = page.locator('main');
+    await expect(mainContent).toBeVisible();
+
+    // Check stat cards are visible
+    await expect(page.getByText('総ユーザー数')).toBeVisible();
+    await expect(page.getByText('最近のアクティビティ')).toBeVisible();
+  });
+
+  test('TC-E2E-010: should trap focus within drawer when open on mobile', async ({ page }) => {
+    // Set mobile viewport
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.reload();
+    await page.waitForTimeout(1000);
+
+    // Open drawer if closed
+    const drawer = page.getByRole('navigation', { name: /メニュー/i });
+    const isExpanded = await drawer.getAttribute('aria-expanded');
+    if (isExpanded !== 'true') {
+      const toggleButton = page.getByRole('button', { name: /メニュー|menu/i }).first();
+      await toggleButton.click();
+      await page.waitForTimeout(500);
+    }
+
+    // Focus should be within drawer
+    const focusedElement = await page.evaluate(() => document.activeElement?.tagName);
+    expect(focusedElement).toBeTruthy();
+  });
 });

@@ -176,3 +176,115 @@ test.describe('Responsive Design Tests', () => {
     });
   });
 });
+
+test.describe('SideDrawer Visual Regression Tests', () => {
+  test('TC-VR-001: dashboard with drawer open on desktop', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto('/login');
+    await page.evaluate(() => localStorage.setItem('isLoggedIn', 'true'));
+    await page.goto('/dashboard');
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByText('ダッシュボード')).toBeVisible();
+    await page.waitForTimeout(1000);
+
+    // Ensure drawer is open
+    const drawer = page.getByRole('navigation', { name: /メニュー/i });
+    await expect(drawer).toBeVisible();
+
+    await expect(page).toHaveScreenshot('dashboard-drawer-open-desktop.png', {
+      fullPage: true,
+      animations: 'disabled',
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+
+  test('TC-VR-002: dashboard with drawer closed on desktop', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto('/login');
+    await page.evaluate(() => localStorage.setItem('isLoggedIn', 'true'));
+    await page.goto('/dashboard');
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByText('ダッシュボード')).toBeVisible();
+    await page.waitForTimeout(1000);
+
+    // Close drawer if open
+    const drawer = page.getByRole('navigation', { name: /メニュー/i });
+    const isExpanded = await drawer.getAttribute('aria-expanded');
+    if (isExpanded === 'true') {
+      const toggleButton = page.getByRole('button', { name: /メニュー|menu/i }).first();
+      await toggleButton.click();
+      await page.waitForTimeout(500);
+    }
+
+    await expect(page).toHaveScreenshot('dashboard-drawer-closed-desktop.png', {
+      fullPage: true,
+      animations: 'disabled',
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+
+  test('TC-VR-003: dashboard with drawer open on mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/login');
+    await page.evaluate(() => localStorage.setItem('isLoggedIn', 'true'));
+    await page.goto('/dashboard');
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByText('ダッシュボード')).toBeVisible();
+    await page.waitForTimeout(1000);
+
+    // Ensure drawer is open
+    const drawer = page.getByRole('navigation', { name: /メニュー/i });
+    await expect(drawer).toBeVisible();
+
+    await expect(page).toHaveScreenshot('dashboard-drawer-open-mobile.png', {
+      fullPage: true,
+      animations: 'disabled',
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+
+  test('TC-VR-004: dashboard with drawer closed on mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/login');
+    await page.evaluate(() => localStorage.setItem('isLoggedIn', 'true'));
+    await page.goto('/dashboard');
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByText('ダッシュボード')).toBeVisible();
+    await page.waitForTimeout(1000);
+
+    // Close drawer if open
+    const drawer = page.getByRole('navigation', { name: /メニュー/i });
+    const isExpanded = await drawer.getAttribute('aria-expanded');
+    if (isExpanded === 'true') {
+      const toggleButton = page.getByRole('button', { name: /メニュー|menu/i }).first();
+      await toggleButton.click();
+      await page.waitForTimeout(500);
+    }
+
+    await expect(page).toHaveScreenshot('dashboard-drawer-closed-mobile.png', {
+      fullPage: true,
+      animations: 'disabled',
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+
+  test('TC-VR-005: dashboard with drawer open on tablet', async ({ page }) => {
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await page.goto('/login');
+    await page.evaluate(() => localStorage.setItem('isLoggedIn', 'true'));
+    await page.goto('/dashboard');
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByText('ダッシュボード')).toBeVisible();
+    await page.waitForTimeout(1000);
+
+    // Ensure drawer is open
+    const drawer = page.getByRole('navigation', { name: /メニュー/i });
+    await expect(drawer).toBeVisible();
+
+    await expect(page).toHaveScreenshot('dashboard-drawer-open-tablet.png', {
+      fullPage: true,
+      animations: 'disabled',
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+});
