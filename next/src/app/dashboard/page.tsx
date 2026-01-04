@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import DataTable from "@/components/DataTable";
 import AvatarDropdown from "@/components/AvatarDropdown";
+import SideDrawer from "@/components/SideDrawer";
+import Header from "@/components/Header";
 import { useRequireAuth } from "@/hooks/useAuth";
 import type { Column } from "@/types/table";
 
@@ -17,6 +19,33 @@ interface Activity extends Record<string, unknown> {
 
 export default function DashboardPage() {
   useRequireAuth();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(true);
+  const drawerToggleRef = useRef<HTMLButtonElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      // On mobile, default to closed
+      if (mobile && isDrawerOpen) {
+        setIsDrawerOpen(false);
+      }
+      // On desktop, default to open
+      if (!mobile && !isDrawerOpen) {
+        setIsDrawerOpen(true);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, [isDrawerOpen]);
+
+  const handleDrawerToggle = () => {
+    setIsDrawerOpen((prev) => !prev);
+  };
 
   // アクティビティデータ
   const activities = useMemo((): Activity[] => {
@@ -84,28 +113,32 @@ export default function DashboardPage() {
       <AnimatedBackground />
 
       {/* ヘッダー */}
-      <header className="relative z-40 backdrop-blur-xl bg-white/10 border-b border-white/20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm border border-white/30">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <h1 className="text-xl font-bold text-white">
-                ダッシュボード
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <AvatarDropdown />
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header
+        title="ダッシュボード"
+        logo={
+          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+        }
+        actions={<AvatarDropdown />}
+        withDrawerToggle={true}
+        onDrawerToggle={handleDrawerToggle}
+        drawerToggleRef={drawerToggleRef}
+        isDrawerOpen={isDrawerOpen}
+      />
 
-      {/* メインコンテンツ */}
-      <main className="relative z-0 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      {/* レイアウトコンテナ */}
+      <div className="flex relative z-0 min-h-[calc(100vh-4rem)]">
+        {/* サイドドロワー */}
+        <SideDrawer
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          triggerButtonRef={drawerToggleRef}
+        />
+
+        {/* メインコンテンツ */}
+        <main className="relative z-0 flex-1 transition-all duration-300">
+          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* 統計カード */}
         <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <div className="backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 p-6 shadow-2xl hover:bg-white/15 transition-all duration-200 transform hover:scale-105">
@@ -245,7 +278,9 @@ export default function DashboardPage() {
             searchPlaceholder="ユーザー、アクション、日時、ステータスで検索..."
           />
         </div>
-      </main>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
