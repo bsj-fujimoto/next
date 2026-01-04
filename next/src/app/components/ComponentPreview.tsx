@@ -289,20 +289,23 @@ export default function ComponentPreview({
                       コピー
                     </button>
                   </div>
-                  <div className="rounded-lg overflow-hidden">
-                    <SyntaxHighlighter
-                      language={language}
-                      style={vscDarkPlus}
-                      customStyle={{
-                        margin: 0,
-                        borderRadius: "0.5rem",
-                        fontSize: language === "typescript" ? "0.875rem" : "0.75rem",
-                        padding: "0.75rem",
-                      }}
-                      {...props}
-                    >
-                      {codeString}
-                    </SyntaxHighlighter>
+                  <div className="w-full min-w-0 overflow-x-auto">
+                    <div className="rounded-lg overflow-hidden">
+                      <SyntaxHighlighter
+                        language={language}
+                        style={vscDarkPlus}
+                        customStyle={{
+                          margin: 0,
+                          borderRadius: "0.5rem",
+                          fontSize: language === "typescript" ? "0.875rem" : "0.75rem",
+                          padding: "0.75rem",
+                          minWidth: "fit-content",
+                        }}
+                        {...props}
+                      >
+                        {codeString}
+                      </SyntaxHighlighter>
+                    </div>
                   </div>
                 </div>
               );
@@ -342,7 +345,7 @@ export default function ComponentPreview({
   };
 
   return (
-    <>
+    <div className="w-full min-w-0">
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
           {displayData.icon && (
@@ -355,46 +358,91 @@ export default function ComponentPreview({
               <div className="flex-shrink-0 inline-block [&_svg]:text-white">{displayData.icon}</div>
             )
           )}
-          <h2 className="text-2xl font-bold text-white">{displayData.title}</h2>
+          <h2 className="text-2xl font-bold text-white truncate">{displayData.title}</h2>
         </div>
-        <p className="text-white/70">{displayData.description}</p>
+        <p className="text-white/70 break-words">{displayData.description}</p>
       </div>
 
       {/* プレビューセクション */}
       {previewElement && (
-        <div className="mb-6 relative z-20 isolate">
-          <GlassCard padding="lg" className="relative isolate">
+        <div className="mb-6 relative z-20 isolate w-full min-w-0">
+          <GlassCard padding="lg" className="relative isolate w-full min-w-0">
             <h3 className="text-lg font-semibold text-white mb-4">プレビュー</h3>
-            {(displayData.previewComponent === "Button" || componentData.id === "Button") ? (
-              <div className="flex flex-wrap gap-4">
-                <Button variant="primary">プライマリ</Button>
-                <Button variant="secondary">セカンダリ</Button>
-                <Button variant="outline">アウトライン</Button>
-                <Button variant="ghost">ゴースト</Button>
-              </div>
-            ) : (displayData.previewComponent === "Link" || componentData.id === "Link") ? (
-              <div className="flex flex-wrap gap-4">
-                <Link href="#" variant="default">デフォルト</Link>
-                <Link href="#" variant="underline">アンダーライン</Link>
-              </div>
-            ) : (displayData.previewComponent === "StatusBadge" || componentData.id === "StatusBadge") ? (
-              <div className="flex flex-wrap gap-4">
-                <StatusBadge status="success">成功</StatusBadge>
-                <StatusBadge status="pending">保留中</StatusBadge>
-                <StatusBadge status="failed">失敗</StatusBadge>
-                <StatusBadge status="warning">警告</StatusBadge>
-              </div>
-            ) : (
-              previewElement
-            )}
+            <div className="w-full min-w-0">
+              {(displayData.previewComponent === "Button" || componentData.id === "Button") ? (
+                <div className="flex flex-wrap gap-4">
+                  <Button variant="primary">プライマリ</Button>
+                  <Button variant="secondary">セカンダリ</Button>
+                  <Button variant="outline">アウトライン</Button>
+                  <Button variant="ghost">ゴースト</Button>
+                </div>
+              ) : (displayData.previewComponent === "Link" || componentData.id === "Link") ? (
+                <div className="flex flex-wrap gap-4">
+                  <Link href="#" variant="default">デフォルト</Link>
+                  <Link href="#" variant="underline">アンダーライン</Link>
+                </div>
+              ) : (displayData.previewComponent === "StatusBadge" || componentData.id === "StatusBadge") ? (
+                <div className="flex flex-wrap gap-4">
+                  <StatusBadge status="success">成功</StatusBadge>
+                  <StatusBadge status="pending">保留中</StatusBadge>
+                  <StatusBadge status="failed">失敗</StatusBadge>
+                  <StatusBadge status="warning">警告</StatusBadge>
+                </div>
+              ) : (displayData.previewComponent === "StatCard" || componentData.id === "StatCard") ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <StatCard
+                    title="総ユーザー数"
+                    value="1,234"
+                    icon={(
+                      <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                    )}
+                    gradientColors="bg-gradient-to-br from-blue-500 to-blue-600"
+                  />
+                  <StatCard
+                    title="売上"
+                    value="¥1,000,000"
+                    icon={(
+                      <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    )}
+                    gradientColors="bg-gradient-to-br from-green-500 to-green-600"
+                  />
+                  <StatCard
+                    title="注文数"
+                    value="500"
+                    icon={(
+                      <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    )}
+                    gradientColors="bg-gradient-to-br from-purple-500 to-purple-600"
+                  />
+                </div>
+              ) : (displayData.previewComponent === "Header" || componentData.id === "Header") ? (
+                <div className="w-full">
+                  {previewElement}
+                </div>
+              ) : (displayData.previewComponent === "FormInput" || componentData.id === "FormInput") ? (
+                <div className="max-w-md">
+                  {previewElement}
+                </div>
+              ) : (
+                previewElement
+              )}
+            </div>
           </GlassCard>
         </div>
       )}
 
       {/* Markdownコンテンツまたは既存のコードサンプル */}
       {markdownData ? (
-        <div className="backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 shadow-2xl p-6 relative z-0 mb-6">
-          {renderMarkdownContent()}
+        <div className="backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 shadow-2xl p-6 relative z-0 mb-6 w-full min-w-0">
+          <div className="w-full min-w-0 overflow-x-auto">
+            {renderMarkdownContent()}
+          </div>
         </div>
       ) : null}
 
@@ -402,12 +450,12 @@ export default function ComponentPreview({
       {!markdownData && (displayData.codeSample || (displayData.variations && displayData.variations.length > 0)) ? (
         <>
           {displayData.codeSample && (
-            <div className="mt-6 backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 shadow-2xl p-6">
+            <div className="mt-6 backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 shadow-2xl p-6 w-full min-w-0">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-white">コードサンプル</h3>
                 <button
                   onClick={() => copyToClipboard(displayData.codeSample!)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm hover:bg-white/20 transition-all"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm hover:bg-white/20 transition-all flex-shrink-0"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -420,34 +468,37 @@ export default function ComponentPreview({
                   コピー
                 </button>
               </div>
-              <div className="rounded-lg overflow-hidden">
-                <SyntaxHighlighter
-                  language="typescript"
-                  style={vscDarkPlus}
-                  customStyle={{
-                    margin: 0,
-                    borderRadius: "0.5rem",
-                    fontSize: "0.875rem",
-                  }}
-                >
-                  {displayData.codeSample}
-                </SyntaxHighlighter>
+              <div className="w-full min-w-0 overflow-x-auto">
+                <div className="rounded-lg overflow-hidden">
+                  <SyntaxHighlighter
+                    language="typescript"
+                    style={vscDarkPlus}
+                    customStyle={{
+                      margin: 0,
+                      borderRadius: "0.5rem",
+                      fontSize: "0.875rem",
+                      minWidth: "fit-content",
+                    }}
+                  >
+                    {displayData.codeSample}
+                  </SyntaxHighlighter>
+                </div>
               </div>
             </div>
           )}
 
           {displayData.variations && displayData.variations.length > 0 && (
-            <div className="mt-6 backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 shadow-2xl p-6">
+            <div className="mt-6 backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 shadow-2xl p-6 w-full min-w-0">
               <h3 className="text-lg font-semibold text-white mb-4">バリエーション</h3>
               <div className="space-y-4">
                 {displayData.variations.map((variation, index) => (
-                  <div key={index} className="border-l-2 border-white/20 pl-4">
+                  <div key={index} className="border-l-2 border-white/20 pl-4 w-full min-w-0">
                     <h4 className="text-white font-medium mb-1">{variation.name}</h4>
-                    <p className="text-white/70 text-sm mb-2">{variation.description}</p>
-                    <div className="relative">
+                    <p className="text-white/70 text-sm mb-2 break-words">{variation.description}</p>
+                    <div className="relative w-full min-w-0">
                       <button
                         onClick={() => copyToClipboard(variation.code)}
-                        className="absolute top-2 right-2 p-1.5 rounded bg-white/10 backdrop-blur-sm border border-white/20 text-white/70 hover:text-white hover:bg-white/20 transition-all z-10"
+                        className="absolute top-2 right-2 p-1.5 rounded bg-white/10 backdrop-blur-sm border border-white/20 text-white/70 hover:text-white hover:bg-white/20 transition-all z-10 flex-shrink-0"
                         title="コピー"
                       >
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -459,19 +510,22 @@ export default function ComponentPreview({
                           />
                         </svg>
                       </button>
-                      <div className="rounded-lg overflow-hidden">
-                        <SyntaxHighlighter
-                          language="typescript"
-                          style={vscDarkPlus}
-                          customStyle={{
-                            margin: 0,
-                            borderRadius: "0.5rem",
-                            fontSize: "0.75rem",
-                            padding: "0.75rem",
-                          }}
-                        >
-                          {variation.code}
-                        </SyntaxHighlighter>
+                      <div className="w-full min-w-0 overflow-x-auto">
+                        <div className="rounded-lg overflow-hidden">
+                          <SyntaxHighlighter
+                            language="typescript"
+                            style={vscDarkPlus}
+                            customStyle={{
+                              margin: 0,
+                              borderRadius: "0.5rem",
+                              fontSize: "0.75rem",
+                              padding: "0.75rem",
+                              minWidth: "fit-content",
+                            }}
+                          >
+                            {variation.code}
+                          </SyntaxHighlighter>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -481,7 +535,7 @@ export default function ComponentPreview({
           )}
         </>
       ) : null}
-    </>
+    </div>
   );
 }
 
