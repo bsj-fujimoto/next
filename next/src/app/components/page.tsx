@@ -220,7 +220,7 @@ export default function ComponentsPage() {
           </div>
 
           {/* 右側: 選択されたコンポーネントのプレビュー */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             {selectedComponentData && (
               <ComponentPreview
                 componentData={selectedComponentData}
