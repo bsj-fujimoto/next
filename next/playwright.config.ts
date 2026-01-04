@@ -10,6 +10,7 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
+    video: 'retain-on-failure', // 失敗時のみ動画を保持
   },
 
   projects: [

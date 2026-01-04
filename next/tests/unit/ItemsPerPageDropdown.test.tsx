@@ -29,13 +29,15 @@ describe('ItemsPerPageDropdown', () => {
       />
     );
 
-    const button = screen.getByRole('button', { name: /^20$/ });
-    fireEvent.click(button);
+    const button = screen.getByText('20').closest('button');
+    if (button) {
+      fireEvent.click(button);
+    }
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /^10$/ })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /^50$/ })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /^100$/ })).toBeInTheDocument();
+      expect(screen.getByRole('menuitem', { name: /^10$/ })).toBeInTheDocument();
+      expect(screen.getByRole('menuitem', { name: /^50$/ })).toBeInTheDocument();
+      expect(screen.getByRole('menuitem', { name: /^100$/ })).toBeInTheDocument();
     });
   });
 
@@ -48,15 +50,17 @@ describe('ItemsPerPageDropdown', () => {
       />
     );
 
-    const button = screen.getByRole('button', { name: /^20$/ });
-    fireEvent.click(button);
+    const button = screen.getByText('20').closest('button');
+    if (button) {
+      fireEvent.click(button);
+    }
 
     await waitFor(() => {
-      const option50 = screen.getByRole('button', { name: /^50$/ });
+      const option50 = screen.getByRole('menuitem', { name: /^50$/ });
       expect(option50).toBeInTheDocument();
     });
 
-    const option50 = screen.getByRole('button', { name: /^50$/ });
+    const option50 = screen.getByRole('menuitem', { name: /^50$/ });
     fireEvent.click(option50);
 
     expect(mockOnChange).toHaveBeenCalledWith(50);
@@ -71,18 +75,20 @@ describe('ItemsPerPageDropdown', () => {
       />
     );
 
-    const button = screen.getByRole('button', { name: /^20$/ });
-    fireEvent.click(button);
+    const button = screen.getByText('20').closest('button');
+    if (button) {
+      fireEvent.click(button);
+    }
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /^50$/ })).toBeInTheDocument();
+      expect(screen.getByRole('menuitem', { name: /^50$/ })).toBeInTheDocument();
     });
 
-    const option50 = screen.getByRole('button', { name: /^50$/ });
+    const option50 = screen.getByRole('menuitem', { name: /^50$/ });
     fireEvent.click(option50);
 
     await waitFor(() => {
-      expect(screen.queryByRole('button', { name: /^10$/ })).not.toBeInTheDocument();
+      expect(screen.queryByRole('menuitem', { name: /^10$/ })).not.toBeInTheDocument();
     });
   });
 
@@ -98,18 +104,20 @@ describe('ItemsPerPageDropdown', () => {
       </div>
     );
 
-    const button = screen.getByRole('button', { name: /^20$/ });
-    fireEvent.click(button);
+    const button = screen.getByText('20').closest('button');
+    if (button) {
+      fireEvent.click(button);
+    }
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /^10$/ })).toBeInTheDocument();
+      expect(screen.getByRole('menuitem', { name: /^10$/ })).toBeInTheDocument();
     });
 
     const outside = screen.getByTestId('outside');
     fireEvent.mouseDown(outside);
 
     await waitFor(() => {
-      expect(screen.queryByRole('button', { name: /^10$/ })).not.toBeInTheDocument();
+      expect(screen.queryByRole('menuitem', { name: /^10$/ })).not.toBeInTheDocument();
     });
   });
 });

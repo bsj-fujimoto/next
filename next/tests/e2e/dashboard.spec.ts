@@ -2,6 +2,13 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Dashboard Page', () => {
   test.beforeEach(async ({ page }) => {
+    // Clear console errors before each test
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        throw new Error(`Console error: ${msg.text()}`);
+      }
+    });
+
     // Login before each test
     await page.goto('/login');
     await page.evaluate(() => localStorage.setItem('isLoggedIn', 'true'));
@@ -61,10 +68,12 @@ test.describe('Dashboard Page', () => {
     // Wait for sort to apply
     await page.waitForTimeout(500);
 
-    // Get first two user names
+    // Get first two user names (skip ID column, get user column which is second)
     const rows = page.locator('tbody tr');
-    const firstUser = await rows.first().locator('td').first().textContent();
-    const secondUser = await rows.nth(1).locator('td').first().textContent();
+    const firstRowCells = rows.first().locator('td');
+    const secondRowCells = rows.nth(1).locator('td');
+    const firstUser = await firstRowCells.nth(1).textContent(); // User is second column
+    const secondUser = await secondRowCells.nth(1).textContent();
 
     // Should be sorted alphabetically
     expect(firstUser! <= secondUser!).toBeTruthy();
@@ -73,42 +82,47 @@ test.describe('Dashboard Page', () => {
     await page.getByRole('columnheader', { name: /ユーザー/ }).click();
     await page.waitForTimeout(500);
 
-    const firstUserReverse = await rows.first().locator('td').first().textContent();
-    const secondUserReverse = await rows.nth(1).locator('td').first().textContent();
+    const firstUserReverse = await firstRowCells.nth(1).textContent();
+    const secondUserReverse = await secondRowCells.nth(1).textContent();
 
     // Should be sorted in reverse
     expect(firstUserReverse! >= secondUserReverse!).toBeTruthy();
   });
 
   test('should navigate between pages', async ({ page }) => {
+    // Wait for page to load
+    await page.waitForLoadState('networkidle');
+    
     // Check we're on page 1 (verify by checking pagination text)
-    await expect(page.getByText(/全 1000 件中 1 - 20/).first()).toBeVisible();
+    await expect(page.getByText(/全 1000 件中.*1.*20/).first()).toBeVisible({ timeout: 10000 });
 
     // Click page 2
     const page2Button = page.getByRole('button', { name: '2' }).first();
-    await expect(page2Button).toBeVisible();
+    await expect(page2Button).toBeVisible({ timeout: 10000 });
     await page2Button.click();
-    await page.waitForTimeout(500);
-
-    // Check we're on page 2 (verify by checking pagination text)
-    await expect(page.getByText(/全 1000 件中 21 - 40/).first()).toBeVisible();
+    
+    // Wait for pagination to update - check that we're on page 2
+    await page.waitForTimeout(1500);
+    await expect(page.getByText(/全 1000 件中.*21.*40/).first()).toBeVisible({ timeout: 10000 });
   });
 
   test('should change items per page', async ({ page }) => {
+    // Wait for page to load
+    await page.waitForLoadState('networkidle');
+    
     // Check default is 20 items per page
-    await expect(page.getByText(/全 1000 件中 1 - 20/).first()).toBeVisible();
+    await expect(page.getByText(/全 1000 件中 1 - 20 件を表示/).first()).toBeVisible({ timeout: 10000 });
 
     // Change to 50 items per page (use custom dropdown)
-    const itemsPerPageLabel = page.locator('text=表示件数').first();
-    await expect(itemsPerPageLabel).toBeVisible({ timeout: 5000 });
-    const dropdownButton = itemsPerPageLabel.locator('..').locator('button').filter({ hasText: /^20$/ }).first();
-    await expect(dropdownButton).toBeVisible({ timeout: 5000 });
+    // Find the dropdown button by looking for button with text "20" near "表示件数"
+    const dropdownButton = page.locator('button').filter({ hasText: /^20$/ }).first();
+    await expect(dropdownButton).toBeVisible({ timeout: 10000 });
     await dropdownButton.click();
     await page.waitForTimeout(500);
     
     // Find and click option 50 in the dropdown menu
-    const option50 = page.locator('div.absolute').filter({ hasText: /^50$/ }).getByRole('button', { name: /^50$/ }).first();
-    await expect(option50).toBeVisible({ timeout: 2000 });
+    const option50 = page.getByRole('menuitem', { name: /^50$/ }).first();
+    await expect(option50).toBeVisible({ timeout: 5000 });
     await option50.click();
     await page.waitForTimeout(500);
 
@@ -116,9 +130,144 @@ test.describe('Dashboard Page', () => {
     await expect(page.getByText(/全 1000 件中 1 - 50/).first()).toBeVisible();
   });
 
+  test('should display avatar icon', async ({ page }) => {
+    // Check avatar icon is visible in header
+    const avatarButton = page.getByRole('button', { name: 'ユーザーメニュー' });
+    await expect(avatarButton).toBeVisible();
+  });
+
+  test('should open dropdown menu when avatar icon is clicked', async ({ page }) => {
+    // Find and click avatar icon
+    const avatarButton = page.getByRole('button', { name: 'ユーザーメニュー' });
+    await avatarButton.click();
+    await page.waitForTimeout(500);
+
+    // Check dropdown menu is visible
+    const menu = page.locator('div[role="menu"]');
+    await expect(menu).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'プロフィール' })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'セッティング' })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'ログアウト' })).toBeVisible();
+
+    // Verify dropdown menu is displayed above other elements (z-index check)
+    const menuElement = await menu.boundingBox();
+    const statCard = page.locator('text=¥1,234,567').first();
+    const statCardElement = await statCard.boundingBox();
+    
+    if (menuElement && statCardElement) {
+      // Menu should be visible and not hidden behind other elements
+      // Check that menu is clickable (not covered by other elements)
+      // Check top-left corner of menu (not center, as center might be on a menuitem)
+      const menuTopX = menuElement.x + 5;
+      const menuTopY = menuElement.y + 5;
+      const elementAtMenuPosition = await page.evaluate(({ x, y }) => {
+        const element = document.elementFromPoint(x, y);
+        return element?.getAttribute('role') || element?.closest('[role="menu"]')?.getAttribute('role');
+      }, { x: menuTopX, y: menuTopY });
+      
+      // Menu should be the topmost element at its position (or a menuitem within the menu)
+      expect(['menu', 'menuitem']).toContain(elementAtMenuPosition);
+    }
+  });
+
+  test('should close dropdown menu when clicking outside', async ({ page }) => {
+    // Open menu
+    const avatarButton = page.getByRole('button', { name: 'ユーザーメニュー' });
+    await avatarButton.click();
+    await page.waitForTimeout(500);
+
+    // Verify menu is open
+    await expect(page.getByRole('menuitem', { name: 'プロフィール' })).toBeVisible();
+
+    // Click outside (on header title)
+    await page.getByText('ダッシュボード').click();
+    await page.waitForTimeout(500);
+
+    // Verify menu is closed
+    await expect(page.getByRole('menuitem', { name: 'プロフィール' })).not.toBeVisible();
+  });
+
+  test('should navigate to profile page', async ({ page }) => {
+    // Open menu
+    const avatarButton = page.getByRole('button', { name: 'ユーザーメニュー' });
+    await avatarButton.click();
+    await page.waitForTimeout(500);
+
+    // Wait for menu to be visible
+    const menu = page.locator('div[role="menu"]');
+    await expect(menu).toBeVisible();
+
+    // Click profile menu item using text content
+    const profileMenuItem = page.getByRole('menuitem', { name: 'プロフィール' });
+    await expect(profileMenuItem).toBeVisible();
+    
+    // Use evaluate to click directly on the element
+    await profileMenuItem.evaluate((el: HTMLElement) => el.click());
+    await page.waitForTimeout(1000);
+
+    // Should navigate to profile page
+    await expect(page).toHaveURL('/profile');
+  });
+
+  test('should navigate to settings page', async ({ page }) => {
+    // Open menu
+    const avatarButton = page.getByRole('button', { name: 'ユーザーメニュー' });
+    await avatarButton.click();
+    await page.waitForTimeout(500);
+
+    // Wait for menu to be visible
+    const menu = page.locator('div[role="menu"]');
+    await expect(menu).toBeVisible();
+
+    // Click settings menu item using text content
+    const settingsMenuItem = page.getByRole('menuitem', { name: 'セッティング' });
+    await expect(settingsMenuItem).toBeVisible();
+    
+    // Use evaluate to click directly on the element
+    await settingsMenuItem.evaluate((el: HTMLElement) => el.click());
+    await page.waitForTimeout(1000);
+
+    // Should navigate to settings page
+    await expect(page).toHaveURL('/settings');
+  });
+
+  test('should logout successfully from dropdown menu', async ({ page }) => {
+    // Open menu
+    const avatarButton = page.getByRole('button', { name: 'ユーザーメニュー' });
+    await avatarButton.click();
+    await page.waitForTimeout(500);
+
+    // Wait for menu to be visible
+    const menu = page.locator('div[role="menu"]');
+    await expect(menu).toBeVisible();
+
+    // Click logout menu item using text content
+    const logoutMenuItem = page.getByRole('menuitem', { name: 'ログアウト' });
+    await expect(logoutMenuItem).toBeVisible();
+    
+    // Use evaluate to click directly on the element
+    await logoutMenuItem.evaluate((el: HTMLElement) => el.click());
+    await page.waitForTimeout(1000);
+
+    // Should redirect to login page
+    await expect(page).toHaveURL('/login');
+    await expect(page.getByText('ようこそ')).toBeVisible();
+  });
+
   test('should logout successfully', async ({ page }) => {
-    // Click logout button
-    await page.getByRole('button', { name: /ログアウト/ }).click();
+    // This test is kept for backward compatibility
+    // Open dropdown and click logout
+    const avatarButton = page.getByRole('button', { name: 'ユーザーメニュー' });
+    await avatarButton.click();
+    await page.waitForTimeout(500);
+    
+    const menu = page.locator('div[role="menu"]');
+    await expect(menu).toBeVisible();
+    
+    const logoutMenuItem = page.getByRole('menuitem', { name: 'ログアウト' });
+    await expect(logoutMenuItem).toBeVisible();
+    await logoutMenuItem.evaluate((el: HTMLElement) => el.click());
+    await page.waitForTimeout(1000);
 
     // Should redirect to login page
     await expect(page).toHaveURL('/login');

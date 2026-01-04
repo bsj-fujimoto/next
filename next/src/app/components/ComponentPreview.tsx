@@ -25,6 +25,8 @@ import Header from "@/components/Header";
 import StatCard from "@/components/StatCard";
 import StatusBadge from "@/components/StatusBadge";
 import Toast from "@/components/Toast";
+import DropdownMenu from "@/components/DropdownMenu";
+import AvatarDropdown from "@/components/AvatarDropdown";
 
 interface ComponentPreviewProps {
   componentData: ComponentItem;
@@ -54,6 +56,8 @@ const componentMap: Record<string, React.ComponentType<any>> = {
   StatCard,
   StatusBadge,
   Toast,
+  DropdownMenu,
+  AvatarDropdown,
 };
 
 export default function ComponentPreview({
@@ -106,6 +110,12 @@ export default function ComponentPreview({
       const processedProps = Object.entries(displayData.previewProps).reduce((acc, [key, value]) => {
         if (typeof value === 'string' && (value === '() => {}' || value.startsWith('() =>'))) {
           acc[key] = () => {};
+        } else if (key === 'items' && Array.isArray(value)) {
+          // items配列のonClickを関数に変換
+          acc[key] = value.map((item: any) => ({
+            ...item,
+            onClick: typeof item.onClick === 'string' ? (() => {}) : item.onClick,
+          }));
         } else {
           acc[key] = value;
         }
@@ -125,6 +135,21 @@ export default function ComponentPreview({
             {...processedProps}
           />
         );
+      }
+
+      // DropdownMenuの場合は特別な処理
+      if (displayData.previewComponent === "DropdownMenu") {
+        // triggerが文字列（JSX文字列）の場合は、ボタン要素に変換
+        if (typeof processedProps.trigger === 'string') {
+          // JSX文字列からテキストを抽出（<button ...>テキスト</button>の形式）
+          const textMatch = processedProps.trigger.match(/>([^<]+)</);
+          const buttonText = textMatch ? textMatch[1] : processedProps.trigger;
+          processedProps.trigger = (
+            <button className="px-4 py-2 bg-blue-500 text-white rounded">
+              {buttonText}
+            </button>
+          );
+        }
       }
 
       // その他のコンポーネントのプレビュー
@@ -195,6 +220,15 @@ export default function ComponentPreview({
         },
         StatusBadge: { status: "success" as const, children: "サンプル" },
         Toast: { message: "サンプルメッセージ", isVisible: true, onClose: () => {}, duration: 3000 },
+        DropdownMenu: {
+          trigger: <button className="px-4 py-2 bg-blue-500 text-white rounded">メニューを開く</button>,
+          items: [
+            { label: "項目1", onClick: () => {} },
+            { label: "項目2", onClick: () => {} },
+            { label: "項目3", onClick: () => {} },
+          ],
+        },
+        AvatarDropdown: {},
       };
 
       const props = defaultProps[componentName] || {};
@@ -294,6 +328,12 @@ export default function ComponentPreview({
           p({ children }: any) {
             return <p className="text-white/70 text-sm mb-2">{children}</p>;
           },
+          ul({ children }: any) {
+            return <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>;
+          },
+          li({ children }: any) {
+            return <li className="text-white/70 text-sm">{children}</li>;
+          },
         }}
       >
         {contentWithoutPreview}
@@ -322,8 +362,8 @@ export default function ComponentPreview({
 
       {/* プレビューセクション */}
       {previewElement && (
-        <div className="mb-6">
-          <GlassCard padding="lg">
+        <div className="mb-6 relative z-20 isolate">
+          <GlassCard padding="lg" className="relative isolate">
             <h3 className="text-lg font-semibold text-white mb-4">プレビュー</h3>
             {(displayData.previewComponent === "Button" || componentData.id === "Button") ? (
               <div className="flex flex-wrap gap-4">
@@ -353,10 +393,13 @@ export default function ComponentPreview({
 
       {/* Markdownコンテンツまたは既存のコードサンプル */}
       {markdownData ? (
-        <div className="backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 shadow-2xl p-6">
+        <div className="backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 shadow-2xl p-6 relative z-0 mb-6">
           {renderMarkdownContent()}
         </div>
-      ) : (displayData.codeSample || (displayData.variations && displayData.variations.length > 0)) ? (
+      ) : null}
+
+      {/* 既存のコードサンプル */}
+      {!markdownData && (displayData.codeSample || (displayData.variations && displayData.variations.length > 0)) ? (
         <>
           {displayData.codeSample && (
             <div className="mt-6 backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 shadow-2xl p-6">

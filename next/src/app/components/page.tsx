@@ -14,7 +14,7 @@ interface ComponentItem {
   status: string;
 }
 
-type SelectedComponent = "DataTable" | "SearchBar" | "Pagination" | "ItemsPerPageDropdown" | "SortableHeader" | "TableHeader" | "TableRow" | "EmptyState" | "AnimatedBackground" | "GlassCard" | "FormInput" | "Checkbox" | "Button" | "Link" | "Header" | "StatCard" | "StatusBadge" | "Toast" | null;
+type SelectedComponent = "DataTable" | "SearchBar" | "Pagination" | "ItemsPerPageDropdown" | "SortableHeader" | "TableHeader" | "TableRow" | "EmptyState" | "AnimatedBackground" | "GlassCard" | "FormInput" | "Checkbox" | "Button" | "Link" | "Header" | "StatCard" | "StatusBadge" | "Toast" | "DropdownMenu" | "AvatarDropdown" | null;
 
 export default function ComponentsPage() {
   const [selectedComponent, setSelectedComponent] = useState<SelectedComponent>("DataTable");
@@ -119,14 +119,14 @@ export default function ComponentsPage() {
       {/* メインコンテンツ */}
       <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* 固定ヘッダー */}
-        <div className="sticky top-0 z-30 mb-8 backdrop-blur-xl bg-white/5 pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 pt-8 -mt-8">
+        <div className="sticky top-0 z-20 mb-8 backdrop-blur-xl bg-white/5 pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 pt-8 -mt-8">
           <h1 className="text-3xl font-bold text-white mb-2">コンポーネント一覧</h1>
           <p className="text-white/70">再利用可能なコンポーネントの一覧です</p>
         </div>
 
         <div className="flex gap-6">
           {/* 左側: コンポーネント選択リスト */}
-          <div className="w-64 flex-shrink-0 sticky top-32 self-start z-20 max-h-[calc(100vh-8rem)] overflow-y-auto">
+          <div className="w-64 flex-shrink-0 sticky top-32 self-start z-10 max-h-[calc(100vh-8rem)] overflow-y-auto">
             <div className="backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 shadow-2xl p-4">
               <h2 className="text-lg font-semibold text-white mb-4">コンポーネント</h2>
               

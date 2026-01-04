@@ -1,11 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import DataTable from "@/components/DataTable";
+import AvatarDropdown from "@/components/AvatarDropdown";
 import { useRequireAuth } from "@/hooks/useAuth";
-import { logout } from "@/utils/auth";
 import type { Column } from "@/types/table";
 
 interface Activity extends Record<string, unknown> {
@@ -17,7 +16,6 @@ interface Activity extends Record<string, unknown> {
 }
 
 export default function DashboardPage() {
-  const router = useRouter();
   useRequireAuth();
 
   // アクティビティデータ
@@ -36,15 +34,22 @@ export default function DashboardPage() {
 
     const result: Activity[] = [];
     const now = new Date("2024-01-15 12:00");
+    
+    // Use a fixed seed for consistent server/client rendering
+    let seed = 12345;
+    const seededRandom = () => {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    };
 
     for (let i = 1; i <= 1000; i++) {
-      const randomUser = users[Math.floor(Math.random() * users.length)];
-      const randomAction = actions[Math.floor(Math.random() * actions.length)];
-      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+      const randomUser = users[Math.floor(seededRandom() * users.length)];
+      const randomAction = actions[Math.floor(seededRandom() * actions.length)];
+      const randomStatus = statuses[Math.floor(seededRandom() * statuses.length)];
 
-      const randomDaysAgo = Math.floor(Math.random() * 30);
-      const randomHours = Math.floor(Math.random() * 24);
-      const randomMinutes = Math.floor(Math.random() * 60);
+      const randomDaysAgo = Math.floor(seededRandom() * 30);
+      const randomHours = Math.floor(seededRandom() * 24);
+      const randomMinutes = Math.floor(seededRandom() * 60);
 
       const activityDate = new Date(now);
       activityDate.setDate(activityDate.getDate() - randomDaysAgo);
@@ -73,17 +78,13 @@ export default function DashboardPage() {
     { key: "status", label: "ステータス", sortable: true },
   ];
 
-  const handleLogout = () => {
-    logout();
-    router.push("/login");
-  };
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 font-sans">
       <AnimatedBackground />
 
       {/* ヘッダー */}
-      <header className="relative z-10 backdrop-blur-xl bg-white/10 border-b border-white/20">
+      <header className="relative z-40 backdrop-blur-xl bg-white/10 border-b border-white/20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-3">
@@ -97,22 +98,14 @@ export default function DashboardPage() {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 px-4 py-2 text-sm font-medium text-white hover:bg-white/30 transition-all duration-200"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                ログアウト
-              </button>
+              <AvatarDropdown />
             </div>
           </div>
         </div>
       </header>
 
       {/* メインコンテンツ */}
-      <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="relative z-0 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* 統計カード */}
         <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <div className="backdrop-blur-xl bg-white/10 rounded-xl border border-white/20 p-6 shadow-2xl hover:bg-white/15 transition-all duration-200 transform hover:scale-105">
