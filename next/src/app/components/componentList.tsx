@@ -223,5 +223,16 @@ export const componentList: ComponentItem[] = [
       </svg>
     ),
   },
+  {
+    id: "SideDrawer",
+    name: "SideDrawer",
+    title: "SideDrawer",
+    description: "サイドドロワーメニューコンポーネントです。画面左に表示されるナビゲーションメニューを提供します。レスポンシブデザインに対応し、モバイルではオーバーレイ表示、デスクトップでは2列レイアウトで表示されます。",
+    icon: (
+      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    ),
+  },
 ];
 
