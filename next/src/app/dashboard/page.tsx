@@ -28,20 +28,16 @@ export default function DashboardPage() {
     const checkMobile = () => {
       const mobile = window.innerWidth < 1024;
       setIsMobile(mobile);
-      // On mobile, default to closed
-      if (mobile && isDrawerOpen) {
-        setIsDrawerOpen(false);
-      }
-      // On desktop, default to open
-      if (!mobile && !isDrawerOpen) {
-        setIsDrawerOpen(true);
-      }
+      setIsDrawerOpen((prev) => {
+        // モバイルの場合は閉じる、デスクトップの場合は開く
+        return mobile ? false : true;
+      });
     };
 
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
-  }, [isDrawerOpen]);
+  }, []); // 依存配列を空にして、マウント時のみ実行
 
   const handleDrawerToggle = () => {
     setIsDrawerOpen((prev) => !prev);
